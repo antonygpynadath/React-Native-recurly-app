@@ -1,19 +1,31 @@
-import { Link } from "expo-router";
-import { Text } from "react-native";
+import { HOME_BALANCE, HOME_USER } from "@/constants/data";
+import { formatCurrency } from "@/lib/utils";
+import dayjs from "dayjs";
+import { Image, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import images from "../../constants/images";
+import "../../global.css";
 
 export default function Index() {
   return (
     <SafeAreaView className="flex-1 p-5 bg-background">
-      <Text className="text-7xl font-sans-extrabold text-primary">Home</Text>
-      <Text className="text-7xl font-bold text-primary">Home</Text>
+      <View className="home-header">
+      <View className="home-user">
+        <Image source={images.avatar} className="home-avatar" />
+     <Text className="home-user-name">{HOME_USER.name}</Text>
+      </View>
+      </View>
 
-      <Link href="/onboarding" className="mt-4 font-sans-bold rounded-md bg-primary p-4 text-white">Go to Onboarding</Link>
-      <Link href="/(auth)/sign-in" className="mt-4 font-sans-bold rounded-md bg-primary p-4 text-white">Go to Signin</Link>
-      <Link href="/(auth)/sign-up" className="mt-4 font-sans-bold rounded-md bg-primary p-4 text-white">Go to Signup</Link>
-      <Link href="/subscriptions/spotify" className="mt-4 font-sans-bold rounded-md bg-primary p-4 text-white">Go to Spotify Subscription</Link>
-      <Link href="/settings" className="mt-4 font-sans-bold rounded-md bg-primary p-4 text-white">Go to Settings</Link>
-      <Link href={{ pathname: "/subscriptions/[id]", params: { id: "claude" }}} className="mt-4 font-sans-bold rounded-md bg-primary p-4 text-white">Claude Subscription</Link>
+      <View className="home-balance-card">
+        <Text className="home-balance-label">Balance</Text>
+        <View className="home-balance-row">
+          <Text className="home-balance-amount">{formatCurrency(HOME_BALANCE.amount)}</Text>
+        <Text className="home-balance-date">
+          {dayjs(HOME_BALANCE.nextRenewalDate).format('MM/DD')}
+        </Text>
+        </View>
+      </View>
+
     </SafeAreaView>
   );
 }
