@@ -255,6 +255,18 @@
         @apply border-destructive;
     }
 
+    .auth-password-wrap {
+        @apply relative justify-center;
+    }
+
+    .auth-input-password {
+        @apply pr-12;
+    }
+
+    .auth-password-toggle {
+        @apply absolute inset-y-0 right-3 items-center justify-center px-1;
+    }
+
     .auth-error {
         @apply text-xs font-sans-medium text-destructive;
     }
