@@ -1,22 +1,25 @@
 import ListHeading from "@/components/ListHeading";
 import SubscriptionCard from "@/components/SubscriptionCard";
 import UpcomingSubscriptionCard from "@/components/UpcomingSubscriptionCard";
-import {
-  HOME_BALANCE,
-  HOME_SUBSCRIPTIONS,
-  HOME_USER,
-  UPCOMING_SUBSCRIPTIONS,
-} from "@/constants/data";
+import { HOME_BALANCE, HOME_SUBSCRIPTIONS, UPCOMING_SUBSCRIPTIONS } from "@/constants/data";
+import { icons } from "@/constants/icons";
 import { formatCurrency } from "@/lib/utils";
+import { useUser } from "@clerk/expo";
 import dayjs from "dayjs";
 import { useState } from "react";
-import { FlatList, Image, Text, View } from "react-native";
+import { FlatList, Image, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import images from "../../constants/images";
 import "../../global.css";
 
 export default function Index() {
+  const { user } = useUser();
+
   const [expandedSubscriptionId, setExpandedSubscriptionId] = useState<string | null>(null);
+
+  // Get user display name: firstName, fullName, or email
+  const displayName =
+    user?.firstName || user?.fullName || user?.emailAddresses[0]?.emailAddress || "User";
 
   return (
     <SafeAreaView className="flex-1 p-5 bg-background">
@@ -27,8 +30,11 @@ export default function Index() {
             <View className="home-header">
               <View className="home-user">
                 <Image source={images.avatar} className="home-avatar" />
-                <Text className="home-user-name">{HOME_USER.name}</Text>
+                <Text className="home-user-name">{displayName}</Text>
               </View>
+              <Pressable onPress={() => {}}>
+                <Image source={icons.add} className="home-add-icon" />
+              </Pressable>
             </View>
 
             <View className="home-balance-card">
