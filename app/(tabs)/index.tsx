@@ -2,24 +2,24 @@ import CreateSubscriptionModal from "@/components/CreateSubscriptionModal";
 import ListHeading from "@/components/ListHeading";
 import SubscriptionCard from "@/components/SubscriptionCard";
 import UpcomingSubscriptionCard from "@/components/UpcomingSubscriptionCard";
-import { HOME_BALANCE, HOME_SUBSCRIPTIONS, UPCOMING_SUBSCRIPTIONS } from "@/constants/data";
+import { HOME_BALANCE } from "@/constants/data";
 import { icons } from "@/constants/icons";
 import { useSubscriptionStore } from "@/lib/subscriptionStore";
 import { formatCurrency } from "@/lib/utils";
 import { useUser } from "@clerk/expo";
 import dayjs from "dayjs";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { FlatList, Image, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import images from "../../constants/images";
 import "../../global.css";
-import { posthog, posthogLog } from "../../lib/posthog";
+import { posthog } from "../../lib/posthog";
 
 export default function Index() {
   const { user } = useUser();
 
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const { addSubscription } = useSubscriptionStore();
+  const { subscriptions, addSubscription } = useSubscriptionStore();
 
   const [expandedSubscriptionId, setExpandedSubscriptionId] = useState<string | null>(null);
 
@@ -32,6 +32,39 @@ export default function Index() {
       subscription_category: newSubscription.category ?? "",
     });
   };
+
+  // Get upcoming subscriptions (active subscriptions with renewal date within next 7 days)
+  const upcomingSubscriptions = useMemo(() => {
+    const now = dayjs();
+    const nextWeek = dayjs().add(7, "days");
+    return subscriptions
+      .filter(
+        (sub) =>
+          sub.status === "active" &&
+          !!sub.renewalDate &&
+          dayjs(sub.renewalDate).isAfter(now) &&
+          dayjs(sub.renewalDate).isBefore(nextWeek),
+      )
+      .sort((a, b) => dayjs(a.renewalDate).diff(dayjs(b.renewalDate)))
+      .map((sub) => ({
+        id: sub.id,
+        icon: sub.icon,
+        name: sub.name,
+        price: sub.price,
+        currency: sub.currency,
+        daysLeft: dayjs(sub.renewalDate).startOf("day").diff(dayjs().startOf("day"), "day"),
+      }));
+  }, [subscriptions]);
+
+  const handleSubscriptionPress = (item: Subscription) => {
+    const isExpanding = expandedSubscriptionId !== item.id;
+    setExpandedSubscriptionId((currentId) => (currentId === item.id ? null : item.id));
+    posthog?.capture(isExpanding ? "subscription_expanded" : "subscription_collapsed", {
+      subscription_name: item.name,
+      subscription_id: item.id,
+    });
+  };
+
   // Get user display name: firstName, fullName, or email
   const displayName =
     user?.firstName || user?.fullName || user?.emailAddresses[0]?.emailAddress || "User";
@@ -39,7 +72,7 @@ export default function Index() {
   return (
     <SafeAreaView className="flex-1 p-5 bg-background">
       <FlatList
-        data={HOME_SUBSCRIPTIONS}
+        data={subscriptions}
         ListHeaderComponent={() => (
           <>
             <View className="home-header">
@@ -69,7 +102,7 @@ export default function Index() {
             <View className="mb-5">
               <ListHeading title="Upcoming" />
               <FlatList
-                data={UPCOMING_SUBSCRIPTIONS}
+                data={upcomingSubscriptions}
                 renderItem={({ item }) => <UpcomingSubscriptionCard {...item} />}
                 keyExtractor={(item) => item.id}
                 horizontal
@@ -88,16 +121,7 @@ export default function Index() {
             {...item}
             expanded={expandedSubscriptionId === item.id}
             onPress={() => {
-              const isExpanded = expandedSubscriptionId !== item.id;
-              setExpandedSubscriptionId(isExpanded ? item.id : null);
-              posthog?.capture("subscription_expansion_toggled", {
-                subscription_id: item.id,
-                is_expanded: isExpanded,
-              });
-              posthogLog.info("subscription_expansion_toggled", {
-                subscription_id: item.id,
-                is_expanded: isExpanded,
-              });
+              handleSubscriptionPress(item);
             }}
           />
         )}
