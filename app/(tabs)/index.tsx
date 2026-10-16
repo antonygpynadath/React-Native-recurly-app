@@ -1,8 +1,10 @@
+import CreateSubscriptionModal from "@/components/CreateSubscriptionModal";
 import ListHeading from "@/components/ListHeading";
 import SubscriptionCard from "@/components/SubscriptionCard";
 import UpcomingSubscriptionCard from "@/components/UpcomingSubscriptionCard";
 import { HOME_BALANCE, HOME_SUBSCRIPTIONS, UPCOMING_SUBSCRIPTIONS } from "@/constants/data";
 import { icons } from "@/constants/icons";
+import { useSubscriptionStore } from "@/lib/subscriptionStore";
 import { formatCurrency } from "@/lib/utils";
 import { useUser } from "@clerk/expo";
 import dayjs from "dayjs";
@@ -10,14 +12,26 @@ import { useState } from "react";
 import { FlatList, Image, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import images from "../../constants/images";
-import { posthog, posthogLog } from "../../lib/posthog";
 import "../../global.css";
+import { posthog, posthogLog } from "../../lib/posthog";
 
 export default function Index() {
   const { user } = useUser();
 
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const { addSubscription } = useSubscriptionStore();
+
   const [expandedSubscriptionId, setExpandedSubscriptionId] = useState<string | null>(null);
 
+  const handleCreateSubscription = (newSubscription: Subscription) => {
+    addSubscription(newSubscription);
+    posthog?.capture("subscription_created", {
+      subscription_name: newSubscription.name,
+      subscription_price: newSubscription.price,
+      subscription_frequency: newSubscription.frequency ?? "",
+      subscription_category: newSubscription.category ?? "",
+    });
+  };
   // Get user display name: firstName, fullName, or email
   const displayName =
     user?.firstName || user?.fullName || user?.emailAddresses[0]?.emailAddress || "User";
@@ -33,7 +47,11 @@ export default function Index() {
                 <Image source={images.avatar} className="home-avatar" />
                 <Text className="home-user-name">{displayName}</Text>
               </View>
-              <Pressable onPress={() => {}}>
+              <Pressable
+                onPress={() => {
+                  setIsModalVisible(true);
+                }}
+              >
                 <Image source={icons.add} className="home-add-icon" />
               </Pressable>
             </View>
@@ -89,6 +107,12 @@ export default function Index() {
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={<Text className="home-empty-state">No subscriptions yet.</Text>}
         contentContainerClassName="pb-20"
+      />
+
+      <CreateSubscriptionModal
+        visible={isModalVisible}
+        onClose={() => setIsModalVisible(false)}
+        onSubmit={handleCreateSubscription}
       />
     </SafeAreaView>
   );
