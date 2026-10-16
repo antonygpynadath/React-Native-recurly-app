@@ -10,6 +10,7 @@ import { useState } from "react";
 import { FlatList, Image, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import images from "../../constants/images";
+import { posthog, posthogLog } from "../../lib/posthog";
 import "../../global.css";
 
 export default function Index() {
@@ -69,7 +70,16 @@ export default function Index() {
             {...item}
             expanded={expandedSubscriptionId === item.id}
             onPress={() => {
-              setExpandedSubscriptionId(expandedSubscriptionId === item.id ? null : item.id);
+              const isExpanded = expandedSubscriptionId !== item.id;
+              setExpandedSubscriptionId(isExpanded ? item.id : null);
+              posthog?.capture("subscription_expansion_toggled", {
+                subscription_id: item.id,
+                is_expanded: isExpanded,
+              });
+              posthogLog.info("subscription_expansion_toggled", {
+                subscription_id: item.id,
+                is_expanded: isExpanded,
+              });
             }}
           />
         )}

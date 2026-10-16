@@ -12,6 +12,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { posthog, posthogLog } from "../../lib/posthog";
 
 const SignUp = () => {
   const { signUp, errors, fetchStatus } = useSignUp();
@@ -78,6 +79,8 @@ const SignUp = () => {
           }
         },
       });
+      posthog?.capture("sign_up_completed");
+      posthogLog.info("sign_up_completed");
     } else {
       console.error("Sign-up attempt not complete:", signUp);
     }

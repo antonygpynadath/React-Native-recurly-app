@@ -12,6 +12,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { posthog } from "../../lib/posthog";
 
 const SignIn = () => {
   const { signIn, errors, fetchStatus } = useSignIn();
@@ -66,6 +67,7 @@ const SignIn = () => {
           }
         },
       });
+      posthog?.capture("sign_in_completed");
     } else if (signIn.status === "needs_second_factor") {
       // Handle MFA if needed (not implemented in this basic flow)
       console.log("MFA required");
@@ -108,6 +110,7 @@ const SignIn = () => {
           }
         },
       });
+      posthog?.capture("sign_in_completed");
     } else {
       console.error("Sign-in attempt not complete:", signIn);
     }

@@ -2,6 +2,7 @@ import images from "@/constants/images";
 import { useClerk, useUser } from "@clerk/expo";
 import { Image, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { posthog, posthogLog } from "../../lib/posthog";
 
 const Settings = () => {
   const { signOut } = useClerk();
@@ -10,6 +11,9 @@ const Settings = () => {
   const handleSignOut = async () => {
     try {
       await signOut();
+      posthog?.capture("user_signed_out");
+      posthogLog.info("user_signed_out");
+      posthog?.reset();
     } catch (error) {
       console.error("Sign-out failed:", error);
     }
