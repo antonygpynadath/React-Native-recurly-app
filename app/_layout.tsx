@@ -1,8 +1,10 @@
-import { ClerkProvider, useAuth } from "@clerk/expo";
+import { ClerkProvider, useAuth, useUser } from "@clerk/expo";
 import { tokenCache } from "@clerk/expo/token-cache";
 import { useFonts } from "expo-font";
 import { SplashScreen, Stack } from "expo-router";
-import { useEffect } from "react";
+import { PostHogProvider } from "posthog-react-native";
+import { useEffect, useRef } from "react";
+import { posthog } from "../lib/posthog";
 import "../global.css";
 
 SplashScreen.preventAutoHideAsync();
@@ -14,6 +16,8 @@ if (!publishableKey) {
 
 function RootLayoutContent() {
   const { isLoaded: authLoaded } = useAuth();
+  const { isLoaded: userLoaded, user } = useUser();
+  const identifiedUserId = useRef<string | null>(null);
 
   const [fontsLoaded] = useFonts({
     "sans-regular": require("../assets/fonts/PlusJakartaSans-Regular.ttf"),
@@ -31,6 +35,27 @@ function RootLayoutContent() {
     }
   }, [fontsLoaded, authLoaded]);
 
+  useEffect(() => {
+    if (!userLoaded) return;
+
+    if (!user) {
+      identifiedUserId.current = null;
+      return;
+    }
+
+    if (identifiedUserId.current === user.id) return;
+
+    posthog?.identify(user.id, {
+      $set: {
+        ...(user.primaryEmailAddress?.emailAddress && {
+          email: user.primaryEmailAddress.emailAddress,
+        }),
+        ...(user.fullName && { name: user.fullName }),
+      },
+    });
+    identifiedUserId.current = user.id;
+  }, [user, userLoaded]);
+
   // Don't render app until both are ready
   if (!fontsLoaded || !authLoaded) return null;
 
@@ -40,7 +65,13 @@ function RootLayoutContent() {
 export default function RootLayout() {
   return (
     <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
-      <RootLayoutContent />
+      {posthog ? (
+        <PostHogProvider client={posthog}>
+          <RootLayoutContent />
+        </PostHogProvider>
+      ) : (
+        <RootLayoutContent />
+      )}
     </ClerkProvider>
   );
 }
