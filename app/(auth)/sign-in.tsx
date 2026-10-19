@@ -284,6 +284,11 @@ const SignIn = () => {
                   {errors.fields.password && (
                     <Text className="auth-error">{errors.fields.password.message}</Text>
                   )}
+                  <Link href={"/(auth)/forgot-password" as Href} asChild>
+                    <Pressable>
+                      <Text className="auth-link">Forgot Password?</Text>
+                    </Pressable>
+                  </Link>
                 </View>
 
                 <Pressable
