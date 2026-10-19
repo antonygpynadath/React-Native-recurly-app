@@ -11,6 +11,7 @@ import { useThemeStore } from "@/lib/themeStore";
 import { formatCurrency } from "@/lib/utils";
 import { useUser } from "@clerk/expo";
 import dayjs from "dayjs";
+import { useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import { FlatList, Image, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -19,8 +20,16 @@ import { posthog } from "../../lib/posthog";
 
 export default function Index() {
   const { user } = useUser();
+  const router = useRouter();
   const theme = useThemeStore((state) => state.theme);
   const colors = getColors(theme);
+
+  const navigateToSubscriptions = (filter: SubscriptionListFilter) => {
+    router.push({
+      pathname: "/subscriptions",
+      params: { filter },
+    });
+  };
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null);
@@ -80,6 +89,12 @@ export default function Index() {
       }));
   }, [subscriptions]);
 
+  const pendingSubscriptions = useMemo(() => {
+    return subscriptions
+      .filter((sub) => !!sub.renewalDate && dayjs(sub.renewalDate).isBefore(dayjs()))
+      .sort((a, b) => dayjs(a.renewalDate).diff(dayjs(b.renewalDate)));
+  }, [subscriptions]);
+
   const handleSubscriptionPress = (item: Subscription) => {
     const isExpanding = expandedSubscriptionId !== item.id;
     setExpandedSubscriptionId((currentId) => (currentId === item.id ? null : item.id));
@@ -96,7 +111,7 @@ export default function Index() {
   return (
     <SafeAreaView className="flex-1 p-5 bg-background">
       <FlatList
-        data={subscriptions}
+        data={pendingSubscriptions}
         ListHeaderComponent={() => (
           <>
             <View className="home-header">
@@ -128,7 +143,10 @@ export default function Index() {
             </View>
 
             <View className="mb-5">
-              <ListHeading title="Upcoming" />
+              <ListHeading
+                title="Upcoming"
+                onViewAllPress={() => navigateToSubscriptions("upcoming")}
+              />
               <FlatList
                 data={upcomingSubscriptions}
                 renderItem={({ item }) => <UpcomingSubscriptionCard {...item} />}
@@ -141,7 +159,10 @@ export default function Index() {
               />
             </View>
 
-            <ListHeading title="All Subscriptions" />
+            <ListHeading
+              title="Pending"
+              onViewAllPress={() => navigateToSubscriptions("pending")}
+            />
           </>
         )}
         renderItem={({ item }) => (
@@ -160,7 +181,7 @@ export default function Index() {
         extraData={expandedSubscriptionId}
         ItemSeparatorComponent={() => <View className="h-4" />}
         showsVerticalScrollIndicator={false}
-        ListEmptyComponent={<Text className="home-empty-state">No subscriptions yet.</Text>}
+        ListEmptyComponent={<Text className="home-empty-state">No pending renewals yet.</Text>}
         contentContainerClassName="pb-20"
       />
 

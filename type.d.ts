@@ -49,8 +49,11 @@ declare global {
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   interface UpcomingSubscriptionCardProps extends Omit<UpcomingSubscription, "id"> {}
 
+  type SubscriptionListFilter = "all" | "upcoming" | "pending";
+
   interface ListHeadingProps {
     title: string;
+    onViewAllPress?: () => void;
   }
 }
 
