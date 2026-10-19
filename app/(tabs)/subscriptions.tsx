@@ -11,9 +11,16 @@ const Subscriptions = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null);
-  const { subscriptions, updateSubscription } = useSubscriptionStore();
+  const { subscriptions, updateSubscription, deleteSubscription, renewSubscription } =
+    useSubscriptionStore();
   const theme = useThemeStore((state) => state.theme);
   const colors = getColors(theme);
+
+  const handleDeleteSubscription = (id: string) => {
+    deleteSubscription(id);
+    setExpandedId((currentId) => (currentId === id ? null : currentId));
+    setEditingSubscription((current) => (current?.id === id ? null : current));
+  };
 
   const filteredSubscriptions = subscriptions.filter(
     (subscription) =>
@@ -45,6 +52,8 @@ const Subscriptions = () => {
             expanded={expandedId === item.id}
             onPress={() => setExpandedId(expandedId === item.id ? null : item.id)}
             onEditPress={() => setEditingSubscription(item)}
+            onRenewPress={() => renewSubscription(item.id)}
+            onDeletePress={() => handleDeleteSubscription(item.id)}
           />
         )}
         contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20, gap: 12 }}

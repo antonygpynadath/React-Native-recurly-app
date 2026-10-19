@@ -213,6 +213,22 @@
         @apply font-sans-bold text-background;
     }
 
+    .sub-actions {
+        @apply mt-2 flex-row gap-2;
+    }
+
+    .sub-action {
+        @apply flex-1 items-center rounded-full bg-primary py-4;
+    }
+
+    .sub-action-delete {
+        @apply bg-destructive;
+    }
+
+    .sub-action-text {
+        @apply font-sans-bold text-background;
+    }
+
     .home-empty-state {
         @apply py-4 text-sm font-sans-medium text-muted-foreground;
     }

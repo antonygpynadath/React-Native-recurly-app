@@ -33,8 +33,8 @@ declare global {
     expanded: boolean;
     onPress: () => void;
     onEditPress?: () => void;
-    onCancelPress?: () => void;
-    isCancelling?: boolean;
+    onDeletePress?: () => void;
+    onRenewPress?: () => void;
   }
 
   interface UpcomingSubscription {

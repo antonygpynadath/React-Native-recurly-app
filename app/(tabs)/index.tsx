@@ -24,7 +24,13 @@ export default function Index() {
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null);
-  const { subscriptions, addSubscription, updateSubscription } = useSubscriptionStore();
+  const {
+    subscriptions,
+    addSubscription,
+    updateSubscription,
+    deleteSubscription,
+    renewSubscription,
+  } = useSubscriptionStore();
 
   const [expandedSubscriptionId, setExpandedSubscriptionId] = useState<string | null>(null);
 
@@ -40,6 +46,16 @@ export default function Index() {
 
   const handleUpdateSubscription = (updatedSubscription: Subscription) => {
     updateSubscription(updatedSubscription);
+  };
+
+  const handleDeleteSubscription = (id: string) => {
+    deleteSubscription(id);
+    setExpandedSubscriptionId((currentId) => (currentId === id ? null : currentId));
+    setEditingSubscription((current) => (current?.id === id ? null : current));
+  };
+
+  const handleRenewSubscription = (id: string) => {
+    renewSubscription(id);
   };
 
   // Get upcoming subscriptions (active subscriptions with renewal date within next 7 days)
@@ -136,6 +152,8 @@ export default function Index() {
               handleSubscriptionPress(item);
             }}
             onEditPress={() => setEditingSubscription(item)}
+            onRenewPress={() => handleRenewSubscription(item.id)}
+            onDeletePress={() => handleDeleteSubscription(item.id)}
           />
         )}
         keyExtractor={(item) => item.id}

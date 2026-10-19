@@ -20,9 +20,13 @@ const SubscriptionCard = ({
   expanded,
   onPress,
   onEditPress,
+  onDeletePress,
+  onRenewPress,
   paymentMethod,
   startDate,
 }: SubscriptionCardProps) => {
+  const hasActions = onEditPress || onRenewPress || onDeletePress;
+
   return (
     <Pressable
       onPress={onPress}
@@ -98,10 +102,42 @@ const SubscriptionCard = ({
             </View>
           </View>
 
-          {onEditPress && (
-            <Pressable className="sub-cancel" onPress={onEditPress}>
-              <Text className="sub-cancel-text">Edit</Text>
-            </Pressable>
+          {hasActions && (
+            <View className="sub-actions">
+              {onEditPress && (
+                <Pressable
+                  className="sub-action"
+                  onPress={(event) => {
+                    event.stopPropagation?.();
+                    onEditPress();
+                  }}
+                >
+                  <Text className="sub-action-text">Edit</Text>
+                </Pressable>
+              )}
+              {onRenewPress && (
+                <Pressable
+                  className="sub-action"
+                  onPress={(event) => {
+                    event.stopPropagation?.();
+                    onRenewPress();
+                  }}
+                >
+                  <Text className="sub-action-text">Renew</Text>
+                </Pressable>
+              )}
+              {onDeletePress && (
+                <Pressable
+                  className="sub-action sub-action-delete"
+                  onPress={(event) => {
+                    event.stopPropagation?.();
+                    onDeletePress();
+                  }}
+                >
+                  <Text className="sub-action-text">Delete</Text>
+                </Pressable>
+              )}
+            </View>
           )}
         </View>
       )}
