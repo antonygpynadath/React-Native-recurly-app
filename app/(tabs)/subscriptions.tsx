@@ -1,4 +1,5 @@
 import SubscriptionCard from "@/components/SubscriptionCard";
+import EditSubscriptionModal from "@/components/subscription/EditSubscriptionModal";
 import { getColors } from "@/constants/theme";
 import { useSubscriptionStore } from "@/lib/subscriptionStore";
 import { useThemeStore } from "@/lib/themeStore";
@@ -9,7 +10,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const Subscriptions = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const { subscriptions } = useSubscriptionStore();
+  const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null);
+  const { subscriptions, updateSubscription } = useSubscriptionStore();
   const theme = useThemeStore((state) => state.theme);
   const colors = getColors(theme);
 
@@ -42,12 +44,20 @@ const Subscriptions = () => {
             {...item}
             expanded={expandedId === item.id}
             onPress={() => setExpandedId(expandedId === item.id ? null : item.id)}
+            onEditPress={() => setEditingSubscription(item)}
           />
         )}
         contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20, gap: 12 }}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
+      />
+
+      <EditSubscriptionModal
+        visible={!!editingSubscription}
+        subscription={editingSubscription}
+        onClose={() => setEditingSubscription(null)}
+        onSubmit={updateSubscription}
       />
     </SafeAreaView>
   );

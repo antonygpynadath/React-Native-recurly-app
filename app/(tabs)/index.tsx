@@ -1,6 +1,7 @@
-import CreateSubscriptionModal from "@/components/CreateSubscriptionModal";
 import ListHeading from "@/components/ListHeading";
 import SubscriptionCard from "@/components/SubscriptionCard";
+import CreateSubscriptionModal from "@/components/subscription/CreateSubscriptionModal";
+import EditSubscriptionModal from "@/components/subscription/EditSubscriptionModal";
 import UpcomingSubscriptionCard from "@/components/UpcomingSubscriptionCard";
 import { HOME_BALANCE } from "@/constants/data";
 import { icons } from "@/constants/icons";
@@ -22,7 +23,8 @@ export default function Index() {
   const colors = getColors(theme);
 
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const { subscriptions, addSubscription } = useSubscriptionStore();
+  const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null);
+  const { subscriptions, addSubscription, updateSubscription } = useSubscriptionStore();
 
   const [expandedSubscriptionId, setExpandedSubscriptionId] = useState<string | null>(null);
 
@@ -34,6 +36,10 @@ export default function Index() {
       subscription_frequency: newSubscription.frequency ?? "",
       subscription_category: newSubscription.category ?? "",
     });
+  };
+
+  const handleUpdateSubscription = (updatedSubscription: Subscription) => {
+    updateSubscription(updatedSubscription);
   };
 
   // Get upcoming subscriptions (active subscriptions with renewal date within next 7 days)
@@ -130,6 +136,7 @@ export default function Index() {
             onPress={() => {
               handleSubscriptionPress(item);
             }}
+            onEditPress={() => setEditingSubscription(item)}
           />
         )}
         keyExtractor={(item) => item.id}
@@ -144,6 +151,13 @@ export default function Index() {
         visible={isModalVisible}
         onClose={() => setIsModalVisible(false)}
         onSubmit={handleCreateSubscription}
+      />
+
+      <EditSubscriptionModal
+        visible={!!editingSubscription}
+        subscription={editingSubscription}
+        onClose={() => setEditingSubscription(null)}
+        onSubmit={handleUpdateSubscription}
       />
     </SafeAreaView>
   );

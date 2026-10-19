@@ -17,6 +17,7 @@ interface SubscriptionStore {
   hydrated: boolean;
   hydrate: () => Promise<void>;
   addSubscription: (subscription: Subscription) => Promise<void>;
+  updateSubscription: (subscription: Subscription) => Promise<void>;
   setSubscriptions: (subscriptions: Subscription[]) => Promise<void>;
 }
 
@@ -42,6 +43,13 @@ export const useSubscriptionStore = create<SubscriptionStore>((set, get) => ({
   },
   addSubscription: async (subscription) => {
     const subscriptions = [subscription, ...get().subscriptions];
+    set({ subscriptions });
+    await persistSubscriptions(subscriptions);
+  },
+  updateSubscription: async (subscription) => {
+    const subscriptions = get().subscriptions.map((s) =>
+      s.id === subscription.id ? subscription : s,
+    );
     set({ subscriptions });
     await persistSubscriptions(subscriptions);
   },

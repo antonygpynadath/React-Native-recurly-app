@@ -6,14 +6,13 @@ import {
   type IconKey,
 } from "@/constants/icons";
 import { getColors } from "@/constants/theme";
-import { posthog, posthogLog } from "@/lib/posthog";
 import { useThemeStore } from "@/lib/themeStore";
 import { formatSubscriptionDateTime } from "@/lib/utils";
 import DateTimePicker, { type DateTimePickerEvent } from "@react-native-community/datetimepicker";
 // eslint-disable-next-line import/no-named-as-default
 import clsx from "clsx";
 import dayjs from "dayjs";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Image,
   KeyboardAvoidingView,
@@ -25,55 +24,79 @@ import {
   TextInput,
   View,
 } from "react-native";
+import {
+  CATEGORIES,
+  CATEGORY_COLORS,
+  type Category,
+  type Frequency,
+} from "./constants";
 
-interface CreateSubscriptionModalProps {
-  visible: boolean;
-  onClose: () => void;
-  onSubmit: (subscription: Subscription) => void;
+export interface SubscriptionFormValues {
+  name: string;
+  price: number;
+  frequency: Frequency;
+  category: Category;
+  icon: IconKey;
+  startDate: string;
+  renewalDate: string;
+  billing: Frequency;
+  color: string;
 }
 
-type Frequency = "Monthly" | "Yearly";
-type Category =
-  | "Entertainment"
-  | "AI Tools"
-  | "Developer Tools"
-  | "Design"
-  | "Productivity"
-  | "Other";
-const CATEGORIES: Category[] = [
-  "Entertainment",
-  "AI Tools",
-  "Developer Tools",
-  "Design",
-  "Productivity",
-  "Other",
-];
-const CATEGORY_COLORS: Record<Category, string> = {
-  Entertainment: "#ff6b6b",
-  "AI Tools": "#b8d4e3",
-  "Developer Tools": "#e8def8",
-  Design: "#f5c542",
-  Productivity: "#95e1d3",
-  Other: "#d4d4d4",
-};
+export interface SubscriptionFormInitialValues {
+  name: string;
+  price: string;
+  frequency: Frequency;
+  category: Category;
+  icon: IconKey;
+  startDate: Date;
+}
 
-const CreateSubscriptionModal = ({ visible, onClose, onSubmit }: CreateSubscriptionModalProps) => {
+interface SubscriptionFormModalProps {
+  visible: boolean;
+  onClose: () => void;
+  title: string;
+  submitLabel: string;
+  initialValues: SubscriptionFormInitialValues;
+  onSubmit: (values: SubscriptionFormValues) => void;
+}
+
+const SubscriptionFormModal = ({
+  visible,
+  onClose,
+  title,
+  submitLabel,
+  initialValues,
+  onSubmit,
+}: SubscriptionFormModalProps) => {
   const theme = useThemeStore((state) => state.theme);
   const colors = getColors(theme);
-  const [name, setName] = useState("");
-  const [price, setPrice] = useState("");
-  const [frequency, setFrequency] = useState<Frequency>("Monthly");
-  const [category, setCategory] = useState<Category>("Other");
-  const [iconKey, setIconKey] = useState<IconKey>(DEFAULT_SUBSCRIPTION_ICON);
+  const [name, setName] = useState(initialValues.name);
+  const [price, setPrice] = useState(initialValues.price);
+  const [frequency, setFrequency] = useState<Frequency>(initialValues.frequency);
+  const [category, setCategory] = useState<Category>(initialValues.category);
+  const [iconKey, setIconKey] = useState<IconKey>(initialValues.icon);
   const [iconPickerVisible, setIconPickerVisible] = useState(false);
-  const [startDate, setStartDate] = useState(() => new Date());
+  const [startDate, setStartDate] = useState(initialValues.startDate);
   const [showDatePicker, setShowDatePicker] = useState(false);
 
-  // Improved price validation
+  useEffect(() => {
+    if (!visible) return;
+    setName(initialValues.name);
+    setPrice(initialValues.price);
+    setFrequency(initialValues.frequency);
+    setCategory(initialValues.category);
+    setIconKey(initialValues.icon);
+    setStartDate(initialValues.startDate);
+    setShowDatePicker(false);
+    setIconPickerVisible(false);
+    // Hydrate only when the modal opens so parent re-renders do not reset in-progress edits.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible]);
+
   const isValidPrice = () => {
     const trimmedPrice = price.trim();
     if (!trimmedPrice) return false;
-    // Strict numeric pattern check
     if (!/^\s*[+-]?(\d+(\.\d+)?|\.\d+)\s*$/.test(trimmedPrice)) return false;
     const numValue = Number(trimmedPrice);
     return Number.isFinite(numValue) && numValue > 0;
@@ -97,53 +120,24 @@ const CreateSubscriptionModal = ({ visible, onClose, onSubmit }: CreateSubscript
     const start = dayjs(startDate);
     const renewalDate = frequency === "Monthly" ? start.add(1, "month") : start.add(1, "year");
 
-    const newSubscription: Subscription = {
-      id: `sub-${Date.now()}`,
+    onSubmit({
       name: name.trim(),
       price: priceValue,
-      currency: "USD",
       frequency,
       category,
-      status: "active",
+      icon: iconKey,
       startDate: start.toISOString(),
       renewalDate: renewalDate.toISOString(),
-      icon: iconKey,
       billing: frequency,
       color: CATEGORY_COLORS[category],
-    };
-
-    onSubmit(newSubscription);
-
-    posthog?.capture("subscription_created", {
-      subscription_name: name.trim(),
-      subscription_price: priceValue,
-      subscription_frequency: frequency,
-      subscription_category: category,
     });
 
-    posthogLog.info("subscription_created", {
-      subscription_name: name.trim(),
-      subscription_price: priceValue,
-      subscription_frequency: frequency,
-      subscription_category: category,
-    });
-
-    resetForm();
     onClose();
   };
 
-  const resetForm = () => {
-    setName("");
-    setPrice("");
-    setFrequency("Monthly");
-    setCategory("Other");
-    setIconKey(DEFAULT_SUBSCRIPTION_ICON);
-    setStartDate(new Date());
-    setShowDatePicker(false);
-  };
-
   const handleClose = () => {
-    resetForm();
+    setShowDatePicker(false);
+    setIconPickerVisible(false);
     onClose();
   };
 
@@ -158,7 +152,7 @@ const CreateSubscriptionModal = ({ visible, onClose, onSubmit }: CreateSubscript
           <Pressable className="modal-overlay" onPress={handleClose}>
             <Pressable className="modal-container" onPress={(e) => e.stopPropagation()}>
               <View className="modal-header">
-                <Text className="modal-title">New Subscription</Text>
+                <Text className="modal-title">{title}</Text>
                 <Pressable className="modal-close" onPress={handleClose}>
                   <Text className="modal-close-text">✕</Text>
                 </Pressable>
@@ -295,7 +289,7 @@ const CreateSubscriptionModal = ({ visible, onClose, onSubmit }: CreateSubscript
                   onPress={handleSubmit}
                   disabled={!isValidForm}
                 >
-                  <Text className="auth-button-text">Create Subscription</Text>
+                  <Text className="auth-button-text">{submitLabel}</Text>
                 </Pressable>
               </ScrollView>
             </Pressable>
@@ -313,4 +307,13 @@ const CreateSubscriptionModal = ({ visible, onClose, onSubmit }: CreateSubscript
   );
 };
 
-export default CreateSubscriptionModal;
+export const DEFAULT_FORM_VALUES: SubscriptionFormInitialValues = {
+  name: "",
+  price: "",
+  frequency: "Monthly",
+  category: "Other",
+  icon: DEFAULT_SUBSCRIPTION_ICON,
+  startDate: new Date(),
+};
+
+export default SubscriptionFormModal;
