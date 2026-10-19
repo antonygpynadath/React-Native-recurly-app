@@ -1,3 +1,4 @@
+import type { IconKey } from "@/constants/icons";
 import type { ImageSourcePropType } from "react-native";
 
 declare global {
@@ -14,7 +15,7 @@ declare global {
 
     interface Subscription {
         id: string;
-        icon: ImageSourcePropType;
+        icon: IconKey;
         name: string;
         plan?: string;
         category?: string;
@@ -38,7 +39,7 @@ declare global {
 
     interface UpcomingSubscription {
         id: string;
-        icon: ImageSourcePropType;
+        icon: IconKey;
         name: string;
         price: number;
         currency?: string;

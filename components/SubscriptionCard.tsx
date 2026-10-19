@@ -1,3 +1,4 @@
+import { icons } from "@/constants/icons";
 import { formatCurrency, formatStatusLabel, formatSubscriptionDateTime } from "@/lib/utils";
 // eslint-disable-next-line import/no-named-as-default
 import clsx from "clsx";
@@ -30,7 +31,7 @@ const SubscriptionCard = ({
     >
       <View className="sub-head">
         <View className="sub-main">
-          <Image source={icon} className="sub-icon" />
+          <Image source={icons[icon]} className="sub-icon" />
           <View className="sub-copy">
             <Text numberOfLines={1} className="sub-title">
               {name}

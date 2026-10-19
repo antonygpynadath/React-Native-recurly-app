@@ -1,10 +1,19 @@
-import { icons } from "@/constants/icons";
+import IconPickerModal from "@/components/IconPickerModal";
+import {
+  DEFAULT_SUBSCRIPTION_ICON,
+  formatIconLabel,
+  icons,
+  type IconKey,
+} from "@/constants/icons";
+import { getColors } from "@/constants/theme";
 import { posthog, posthogLog } from "@/lib/posthog";
+import { useThemeStore } from "@/lib/themeStore";
 // eslint-disable-next-line import/no-named-as-default
 import clsx from "clsx";
 import dayjs from "dayjs";
 import React, { useState } from "react";
 import {
+  Image,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -23,7 +32,12 @@ interface CreateSubscriptionModalProps {
 
 type Frequency = "Monthly" | "Yearly";
 type Category =
-  "Entertainment" | "AI Tools" | "Developer Tools" | "Design" | "Productivity" | "Other";
+  | "Entertainment"
+  | "AI Tools"
+  | "Developer Tools"
+  | "Design"
+  | "Productivity"
+  | "Other";
 const CATEGORIES: Category[] = [
   "Entertainment",
   "AI Tools",
@@ -42,10 +56,14 @@ const CATEGORY_COLORS: Record<Category, string> = {
 };
 
 const CreateSubscriptionModal = ({ visible, onClose, onSubmit }: CreateSubscriptionModalProps) => {
+  const theme = useThemeStore((state) => state.theme);
+  const colors = getColors(theme);
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [frequency, setFrequency] = useState<Frequency>("Monthly");
   const [category, setCategory] = useState<Category>("Other");
+  const [iconKey, setIconKey] = useState<IconKey>(DEFAULT_SUBSCRIPTION_ICON);
+  const [iconPickerVisible, setIconPickerVisible] = useState(false);
 
   // Improved price validation
   const isValidPrice = () => {
@@ -76,7 +94,7 @@ const CreateSubscriptionModal = ({ visible, onClose, onSubmit }: CreateSubscript
       status: "active",
       startDate: now.toISOString(),
       renewalDate: renewalDate.toISOString(),
-      icon: icons.add,
+      icon: iconKey,
       billing: frequency,
       color: CATEGORY_COLORS[category],
     };
@@ -106,6 +124,7 @@ const CreateSubscriptionModal = ({ visible, onClose, onSubmit }: CreateSubscript
     setPrice("");
     setFrequency("Monthly");
     setCategory("Other");
+    setIconKey(DEFAULT_SUBSCRIPTION_ICON);
   };
 
   const handleClose = () => {
@@ -114,122 +133,148 @@ const CreateSubscriptionModal = ({ visible, onClose, onSubmit }: CreateSubscript
   };
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={handleClose}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        className="flex-1"
-        keyboardVerticalOffset={0}
-      >
-        <Pressable className="modal-overlay" onPress={handleClose}>
-          <Pressable className="modal-container" onPress={(e) => e.stopPropagation()}>
-            <View className="modal-header">
-              <Text className="modal-title">New Subscription</Text>
-              <Pressable className="modal-close" onPress={handleClose}>
-                <Text className="modal-close-text">✕</Text>
-              </Pressable>
-            </View>
-
-            <ScrollView
-              className="p-5"
-              showsVerticalScrollIndicator={false}
-              keyboardShouldPersistTaps="handled"
-              contentContainerStyle={{ gap: 20, paddingBottom: 20 }}
-            >
-              <View className="auth-field">
-                <Text className="auth-label">Name</Text>
-                <TextInput
-                  className="auth-input"
-                  placeholder="Subscription name"
-                  placeholderTextColor="rgba(0, 0, 0, 0.4)"
-                  value={name}
-                  onChangeText={setName}
-                />
+    <>
+      <Modal visible={visible} transparent animationType="slide" onRequestClose={handleClose}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          className="flex-1"
+          keyboardVerticalOffset={0}
+        >
+          <Pressable className="modal-overlay" onPress={handleClose}>
+            <Pressable className="modal-container" onPress={(e) => e.stopPropagation()}>
+              <View className="modal-header">
+                <Text className="modal-title">New Subscription</Text>
+                <Pressable className="modal-close" onPress={handleClose}>
+                  <Text className="modal-close-text">✕</Text>
+                </Pressable>
               </View>
 
-              <View className="auth-field">
-                <Text className="auth-label">Price</Text>
-                <TextInput
-                  className="auth-input"
-                  placeholder="0.00"
-                  placeholderTextColor="rgba(0, 0, 0, 0.4)"
-                  value={price}
-                  onChangeText={setPrice}
-                  keyboardType="decimal-pad"
-                />
-              </View>
-
-              <View className="auth-field">
-                <Text className="auth-label">Frequency</Text>
-                <View className="picker-row">
-                  <Pressable
-                    className={clsx(
-                      "picker-option",
-                      frequency === "Monthly" && "picker-option-active",
-                    )}
-                    onPress={() => setFrequency("Monthly")}
-                  >
-                    <Text
-                      className={clsx(
-                        "picker-option-text",
-                        frequency === "Monthly" && "picker-option-text-active",
-                      )}
-                    >
-                      Monthly
-                    </Text>
-                  </Pressable>
-                  <Pressable
-                    className={clsx(
-                      "picker-option",
-                      frequency === "Yearly" && "picker-option-active",
-                    )}
-                    onPress={() => setFrequency("Yearly")}
-                  >
-                    <Text
-                      className={clsx(
-                        "picker-option-text",
-                        frequency === "Yearly" && "picker-option-text-active",
-                      )}
-                    >
-                      Yearly
-                    </Text>
-                  </Pressable>
+              <ScrollView
+                className="p-5"
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
+                contentContainerStyle={{ gap: 20, paddingBottom: 20 }}
+              >
+                <View className="auth-field">
+                  <Text className="auth-label">Name</Text>
+                  <TextInput
+                    className="auth-input"
+                    placeholder="Subscription name"
+                    placeholderTextColor={colors.mutedForeground}
+                    value={name}
+                    onChangeText={setName}
+                  />
                 </View>
-              </View>
 
-              <View className="auth-field">
-                <Text className="auth-label">Category</Text>
-                <View className="category-scroll">
-                  {CATEGORIES.map((cat) => (
+                <View className="auth-field">
+                  <Text className="auth-label">Price</Text>
+                  <TextInput
+                    className="auth-input"
+                    placeholder="0.00"
+                    placeholderTextColor={colors.mutedForeground}
+                    value={price}
+                    onChangeText={setPrice}
+                    keyboardType="decimal-pad"
+                  />
+                </View>
+
+                <View className="auth-field">
+                  <Text className="auth-label">Icon</Text>
+                  <View className="icon-field-row">
+                    <View className="icon-field-preview">
+                      <Image source={icons[iconKey]} className="icon-field-preview-image" />
+                    </View>
                     <Pressable
-                      key={cat}
-                      className={clsx("category-chip", category === cat && "category-chip-active")}
-                      onPress={() => setCategory(cat)}
+                      className="icon-field-button"
+                      onPress={() => setIconPickerVisible(true)}
+                    >
+                      <Text className="icon-field-button-text">
+                        Choose icon ({formatIconLabel(iconKey)})
+                      </Text>
+                    </Pressable>
+                  </View>
+                </View>
+
+                <View className="auth-field">
+                  <Text className="auth-label">Frequency</Text>
+                  <View className="picker-row">
+                    <Pressable
+                      className={clsx(
+                        "picker-option",
+                        frequency === "Monthly" && "picker-option-active",
+                      )}
+                      onPress={() => setFrequency("Monthly")}
                     >
                       <Text
                         className={clsx(
-                          "category-chip-text",
-                          category === cat && "category-chip-text-active",
+                          "picker-option-text",
+                          frequency === "Monthly" && "picker-option-text-active",
                         )}
                       >
-                        {cat}
+                        Monthly
                       </Text>
                     </Pressable>
-                  ))}
+                    <Pressable
+                      className={clsx(
+                        "picker-option",
+                        frequency === "Yearly" && "picker-option-active",
+                      )}
+                      onPress={() => setFrequency("Yearly")}
+                    >
+                      <Text
+                        className={clsx(
+                          "picker-option-text",
+                          frequency === "Yearly" && "picker-option-text-active",
+                        )}
+                      >
+                        Yearly
+                      </Text>
+                    </Pressable>
+                  </View>
                 </View>
-              </View>
 
-              <Pressable
-                className={clsx("auth-button", !isValidForm && "auth-button-disabled")}
-                onPress={handleSubmit}
-                disabled={!isValidForm}
-              >
-                <Text className="auth-button-text">Create Subscription</Text>
-              </Pressable>
-            </ScrollView>
+                <View className="auth-field">
+                  <Text className="auth-label">Category</Text>
+                  <View className="category-scroll">
+                    {CATEGORIES.map((cat) => (
+                      <Pressable
+                        key={cat}
+                        className={clsx("category-chip", category === cat && "category-chip-active")}
+                        onPress={() => setCategory(cat)}
+                      >
+                        <Text
+                          className={clsx(
+                            "category-chip-text",
+                            category === cat && "category-chip-text-active",
+                          )}
+                        >
+                          {cat}
+                        </Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                </View>
+
+                <Pressable
+                  className={clsx("auth-button", !isValidForm && "auth-button-disabled")}
+                  onPress={handleSubmit}
+                  disabled={!isValidForm}
+                >
+                  <Text className="auth-button-text">Create Subscription</Text>
+                </Pressable>
+              </ScrollView>
+            </Pressable>
           </Pressable>
-        </Pressable>
-      </KeyboardAvoidingView>
-    </Modal>
+        </KeyboardAvoidingView>
+      </Modal>
+
+      <IconPickerModal
+        visible={iconPickerVisible}
+        selectedIcon={iconKey}
+        onClose={() => setIconPickerVisible(false)}
+        onConfirm={setIconKey}
+      />
+    </>
   );
 };
 
