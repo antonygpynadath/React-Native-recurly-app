@@ -8,6 +8,8 @@ import {
 import { getColors } from "@/constants/theme";
 import { posthog, posthogLog } from "@/lib/posthog";
 import { useThemeStore } from "@/lib/themeStore";
+import { formatSubscriptionDateTime } from "@/lib/utils";
+import DateTimePicker, { type DateTimePickerEvent } from "@react-native-community/datetimepicker";
 // eslint-disable-next-line import/no-named-as-default
 import clsx from "clsx";
 import dayjs from "dayjs";
@@ -64,6 +66,8 @@ const CreateSubscriptionModal = ({ visible, onClose, onSubmit }: CreateSubscript
   const [category, setCategory] = useState<Category>("Other");
   const [iconKey, setIconKey] = useState<IconKey>(DEFAULT_SUBSCRIPTION_ICON);
   const [iconPickerVisible, setIconPickerVisible] = useState(false);
+  const [startDate, setStartDate] = useState(() => new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   // Improved price validation
   const isValidPrice = () => {
@@ -77,12 +81,21 @@ const CreateSubscriptionModal = ({ visible, onClose, onSubmit }: CreateSubscript
 
   const isValidForm = name.trim() !== "" && isValidPrice();
 
+  const handleStartDateChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
+    if (Platform.OS === "android") {
+      setShowDatePicker(false);
+    }
+    if (event.type === "set" && selectedDate) {
+      setStartDate(selectedDate);
+    }
+  };
+
   const handleSubmit = () => {
     if (!isValidForm) return;
 
     const priceValue = Number(price.trim());
-    const now = dayjs();
-    const renewalDate = frequency === "Monthly" ? now.add(1, "month") : now.add(1, "year");
+    const start = dayjs(startDate);
+    const renewalDate = frequency === "Monthly" ? start.add(1, "month") : start.add(1, "year");
 
     const newSubscription: Subscription = {
       id: `sub-${Date.now()}`,
@@ -92,7 +105,7 @@ const CreateSubscriptionModal = ({ visible, onClose, onSubmit }: CreateSubscript
       frequency,
       category,
       status: "active",
-      startDate: now.toISOString(),
+      startDate: start.toISOString(),
       renewalDate: renewalDate.toISOString(),
       icon: iconKey,
       billing: frequency,
@@ -125,6 +138,8 @@ const CreateSubscriptionModal = ({ visible, onClose, onSubmit }: CreateSubscript
     setFrequency("Monthly");
     setCategory("Other");
     setIconKey(DEFAULT_SUBSCRIPTION_ICON);
+    setStartDate(new Date());
+    setShowDatePicker(false);
   };
 
   const handleClose = () => {
@@ -193,6 +208,26 @@ const CreateSubscriptionModal = ({ visible, onClose, onSubmit }: CreateSubscript
                       </Text>
                     </Pressable>
                   </View>
+                </View>
+
+                <View className="auth-field">
+                  <Text className="auth-label">Start Date</Text>
+                  <Pressable
+                    className="icon-field-button"
+                    onPress={() => setShowDatePicker((prev) => !prev)}
+                  >
+                    <Text className="icon-field-button-text">
+                      {formatSubscriptionDateTime(startDate.toISOString())}
+                    </Text>
+                  </Pressable>
+                  {showDatePicker && (
+                    <DateTimePicker
+                      value={startDate}
+                      mode="date"
+                      display={Platform.OS === "ios" ? "spinner" : "default"}
+                      onChange={handleStartDateChange}
+                    />
+                  )}
                 </View>
 
                 <View className="auth-field">
