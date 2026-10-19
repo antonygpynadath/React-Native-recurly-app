@@ -1,12 +1,15 @@
 import images from "@/constants/images";
+import { useThemeStore } from "@/lib/themeStore";
 import { useClerk, useUser } from "@clerk/expo";
-import { Image, Pressable, Text, View } from "react-native";
+import { Image, Pressable, Switch, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { posthog, posthogLog } from "../../lib/posthog";
 
 const Settings = () => {
   const { signOut } = useClerk();
   const { user } = useUser();
+  const theme = useThemeStore((state) => state.theme);
+  const setTheme = useThemeStore((state) => state.setTheme);
 
   const handleSignOut = async () => {
     try {
@@ -22,6 +25,7 @@ const Settings = () => {
   const displayName =
     user?.firstName || user?.fullName || user?.emailAddresses[0]?.emailAddress || "User";
   const email = user?.emailAddresses[0]?.emailAddress;
+  const isDark = theme === "dark";
 
   return (
     <SafeAreaView className="flex-1 bg-background p-5">
@@ -40,6 +44,20 @@ const Settings = () => {
               <Text className="text-sm font-sans-medium text-muted-foreground">{email}</Text>
             )}
           </View>
+        </View>
+      </View>
+
+      {/* Appearance Section */}
+      <View className="auth-card mb-5">
+        <Text className="text-base font-sans-semibold text-primary mb-3">Appearance</Text>
+        <View className="flex-row justify-between items-center py-2">
+          <Text className="text-sm font-sans-medium text-muted-foreground">Dark mode</Text>
+          <Switch
+            value={isDark}
+            onValueChange={(enabled) => setTheme(enabled ? "dark" : "light")}
+            trackColor={{ false: "#f6eecf", true: "#ea7a53" }}
+            thumbColor="#fff9e3"
+          />
         </View>
       </View>
 

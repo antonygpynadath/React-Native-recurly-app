@@ -4,7 +4,9 @@ import SubscriptionCard from "@/components/SubscriptionCard";
 import UpcomingSubscriptionCard from "@/components/UpcomingSubscriptionCard";
 import { HOME_BALANCE } from "@/constants/data";
 import { icons } from "@/constants/icons";
+import { getColors } from "@/constants/theme";
 import { useSubscriptionStore } from "@/lib/subscriptionStore";
+import { useThemeStore } from "@/lib/themeStore";
 import { formatCurrency } from "@/lib/utils";
 import { useUser } from "@clerk/expo";
 import dayjs from "dayjs";
@@ -12,11 +14,12 @@ import { useMemo, useState } from "react";
 import { FlatList, Image, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import images from "../../constants/images";
-import "../../global.css";
 import { posthog } from "../../lib/posthog";
 
 export default function Index() {
   const { user } = useUser();
+  const theme = useThemeStore((state) => state.theme);
+  const colors = getColors(theme);
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const { subscriptions, addSubscription } = useSubscriptionStore();
@@ -85,7 +88,11 @@ export default function Index() {
                   setIsModalVisible(true);
                 }}
               >
-                <Image source={icons.add} className="home-add-icon" />
+                <Image
+                  source={icons.add}
+                  className="home-add-icon"
+                  style={{ tintColor: colors.primary }}
+                />
               </Pressable>
             </View>
 

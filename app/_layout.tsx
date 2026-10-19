@@ -2,9 +2,11 @@ import { ClerkProvider, useAuth, useUser } from "@clerk/expo";
 import { tokenCache } from "@clerk/expo/token-cache";
 import { useFonts } from "expo-font";
 import { SplashScreen, Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { PostHogProvider } from "posthog-react-native";
 import { useEffect, useRef } from "react";
 import { posthog } from "../lib/posthog";
+import { useThemeStore } from "../lib/themeStore";
 import "../global.css";
 
 SplashScreen.preventAutoHideAsync();
@@ -18,6 +20,9 @@ function RootLayoutContent() {
   const { isLoaded: authLoaded } = useAuth();
   const { isLoaded: userLoaded, user } = useUser();
   const identifiedUserId = useRef<string | null>(null);
+  const theme = useThemeStore((state) => state.theme);
+  const hydrated = useThemeStore((state) => state.hydrated);
+  const hydrate = useThemeStore((state) => state.hydrate);
 
   const [fontsLoaded] = useFonts({
     "sans-regular": require("../assets/fonts/PlusJakartaSans-Regular.ttf"),
@@ -29,11 +34,14 @@ function RootLayoutContent() {
   });
 
   useEffect(() => {
-    // Hide splash only when both fonts and auth are loaded
-    if (fontsLoaded && authLoaded) {
+    hydrate();
+  }, [hydrate]);
+
+  useEffect(() => {
+    if (fontsLoaded && authLoaded && hydrated) {
       SplashScreen.hideAsync();
     }
-  }, [fontsLoaded, authLoaded]);
+  }, [fontsLoaded, authLoaded, hydrated]);
 
   useEffect(() => {
     if (!userLoaded) return;
@@ -56,10 +64,14 @@ function RootLayoutContent() {
     identifiedUserId.current = user.id;
   }, [user, userLoaded]);
 
-  // Don't render app until both are ready
-  if (!fontsLoaded || !authLoaded) return null;
+  if (!fontsLoaded || !authLoaded || !hydrated) return null;
 
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return (
+    <>
+      <StatusBar style={theme === "dark" ? "light" : "dark"} />
+      <Stack screenOptions={{ headerShown: false }} />
+    </>
+  );
 }
 
 export default function RootLayout() {
