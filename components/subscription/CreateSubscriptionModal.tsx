@@ -35,6 +35,7 @@ const CreateSubscriptionModal = ({ visible, onClose, onSubmit }: CreateSubscript
       icon: values.icon,
       billing: values.billing,
       color: values.color,
+      paymentMethod: values.paymentMethod,
     };
 
     onSubmit(newSubscription);

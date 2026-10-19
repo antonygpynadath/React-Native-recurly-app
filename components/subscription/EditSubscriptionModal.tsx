@@ -1,7 +1,7 @@
 import { DEFAULT_SUBSCRIPTION_ICON } from "@/constants/icons";
 import { posthog, posthogLog } from "@/lib/posthog";
 import React, { useMemo } from "react";
-import { isCategory, isFrequency } from "./constants";
+import { isCategory, isFrequency, parsePaymentMethod } from "./constants";
 import SubscriptionFormModal, {
   DEFAULT_FORM_VALUES,
   type SubscriptionFormValues,
@@ -23,6 +23,8 @@ const EditSubscriptionModal = ({
   const initialValues = useMemo(() => {
     if (!subscription) return DEFAULT_FORM_VALUES;
 
+    const { paymentType, cardNumber } = parsePaymentMethod(subscription.paymentMethod);
+
     return {
       name: subscription.name,
       price: String(subscription.price),
@@ -36,6 +38,8 @@ const EditSubscriptionModal = ({
         : DEFAULT_FORM_VALUES.category,
       icon: subscription.icon ?? DEFAULT_SUBSCRIPTION_ICON,
       startDate: subscription.startDate ? new Date(subscription.startDate) : new Date(),
+      paymentType,
+      cardNumber,
     };
   }, [subscription]);
 
@@ -53,6 +57,7 @@ const EditSubscriptionModal = ({
       icon: values.icon,
       billing: values.billing,
       color: values.color,
+      paymentMethod: values.paymentMethod,
     };
 
     onSubmit(updatedSubscription);

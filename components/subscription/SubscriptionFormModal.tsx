@@ -27,8 +27,11 @@ import {
 import {
   CATEGORIES,
   CATEGORY_COLORS,
+  formatPaymentMethod,
+  PAYMENT_TYPES,
   type Category,
   type Frequency,
+  type PaymentType,
 } from "./constants";
 
 export interface SubscriptionFormValues {
@@ -41,6 +44,7 @@ export interface SubscriptionFormValues {
   renewalDate: string;
   billing: Frequency;
   color: string;
+  paymentMethod?: string;
 }
 
 export interface SubscriptionFormInitialValues {
@@ -50,6 +54,8 @@ export interface SubscriptionFormInitialValues {
   category: Category;
   icon: IconKey;
   startDate: Date;
+  paymentType: PaymentType | null;
+  cardNumber: string;
 }
 
 interface SubscriptionFormModalProps {
@@ -79,6 +85,8 @@ const SubscriptionFormModal = ({
   const [iconPickerVisible, setIconPickerVisible] = useState(false);
   const [startDate, setStartDate] = useState(initialValues.startDate);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [paymentType, setPaymentType] = useState<PaymentType | null>(initialValues.paymentType);
+  const [cardNumber, setCardNumber] = useState(initialValues.cardNumber);
 
   useEffect(() => {
     if (!visible) return;
@@ -88,6 +96,8 @@ const SubscriptionFormModal = ({
     setCategory(initialValues.category);
     setIconKey(initialValues.icon);
     setStartDate(initialValues.startDate);
+    setPaymentType(initialValues.paymentType);
+    setCardNumber(initialValues.cardNumber);
     setShowDatePicker(false);
     setIconPickerVisible(false);
     // Hydrate only when the modal opens so parent re-renders do not reset in-progress edits.
@@ -130,9 +140,22 @@ const SubscriptionFormModal = ({
       renewalDate: renewalDate.toISOString(),
       billing: frequency,
       color: CATEGORY_COLORS[category],
+      paymentMethod: formatPaymentMethod(paymentType, cardNumber),
     });
 
     onClose();
+  };
+
+  const handlePaymentTypePress = (type: PaymentType) => {
+    if (paymentType === type) {
+      setPaymentType(null);
+      setCardNumber("");
+      return;
+    }
+    setPaymentType(type);
+    if (type === "Cash") {
+      setCardNumber("");
+    }
   };
 
   const handleClose = () => {
@@ -284,6 +307,45 @@ const SubscriptionFormModal = ({
                   </View>
                 </View>
 
+                <View className="auth-field">
+                  <Text className="auth-label">Payment (optional)</Text>
+                  <View className="picker-row">
+                    {PAYMENT_TYPES.map((type) => (
+                      <Pressable
+                        key={type}
+                        className={clsx(
+                          "picker-option",
+                          paymentType === type && "picker-option-active",
+                        )}
+                        onPress={() => handlePaymentTypePress(type)}
+                      >
+                        <Text
+                          className={clsx(
+                            "picker-option-text",
+                            paymentType === type && "picker-option-text-active",
+                          )}
+                        >
+                          {type}
+                        </Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                </View>
+
+                {(paymentType === "Credit card" || paymentType === "Debit card") && (
+                  <View className="auth-field">
+                    <Text className="auth-label">Card number (optional)</Text>
+                    <TextInput
+                      className="auth-input"
+                      placeholder="Last digits to identify the card"
+                      placeholderTextColor={colors.mutedForeground}
+                      value={cardNumber}
+                      onChangeText={setCardNumber}
+                      keyboardType="number-pad"
+                    />
+                  </View>
+                )}
+
                 <Pressable
                   className={clsx("auth-button", !isValidForm && "auth-button-disabled")}
                   onPress={handleSubmit}
@@ -314,6 +376,8 @@ export const DEFAULT_FORM_VALUES: SubscriptionFormInitialValues = {
   category: "Other",
   icon: DEFAULT_SUBSCRIPTION_ICON,
   startDate: new Date(),
+  paymentType: null,
+  cardNumber: "",
 };
 
 export default SubscriptionFormModal;
