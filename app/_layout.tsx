@@ -6,6 +6,7 @@ import { StatusBar } from "expo-status-bar";
 import { PostHogProvider } from "posthog-react-native";
 import { useEffect, useRef } from "react";
 import { posthog } from "../lib/posthog";
+import { useSubscriptionStore } from "../lib/subscriptionStore";
 import { useThemeStore } from "../lib/themeStore";
 import "../global.css";
 
@@ -21,8 +22,10 @@ function RootLayoutContent() {
   const { isLoaded: userLoaded, user } = useUser();
   const identifiedUserId = useRef<string | null>(null);
   const theme = useThemeStore((state) => state.theme);
-  const hydrated = useThemeStore((state) => state.hydrated);
-  const hydrate = useThemeStore((state) => state.hydrate);
+  const themeHydrated = useThemeStore((state) => state.hydrated);
+  const hydrateTheme = useThemeStore((state) => state.hydrate);
+  const subscriptionsHydrated = useSubscriptionStore((state) => state.hydrated);
+  const hydrateSubscriptions = useSubscriptionStore((state) => state.hydrate);
 
   const [fontsLoaded] = useFonts({
     "sans-regular": require("../assets/fonts/PlusJakartaSans-Regular.ttf"),
@@ -34,14 +37,15 @@ function RootLayoutContent() {
   });
 
   useEffect(() => {
-    hydrate();
-  }, [hydrate]);
+    hydrateTheme();
+    hydrateSubscriptions();
+  }, [hydrateTheme, hydrateSubscriptions]);
 
   useEffect(() => {
-    if (fontsLoaded && authLoaded && hydrated) {
+    if (fontsLoaded && authLoaded && themeHydrated && subscriptionsHydrated) {
       SplashScreen.hideAsync();
     }
-  }, [fontsLoaded, authLoaded, hydrated]);
+  }, [fontsLoaded, authLoaded, themeHydrated, subscriptionsHydrated]);
 
   useEffect(() => {
     if (!userLoaded) return;
@@ -64,7 +68,7 @@ function RootLayoutContent() {
     identifiedUserId.current = user.id;
   }, [user, userLoaded]);
 
-  if (!fontsLoaded || !authLoaded || !hydrated) return null;
+  if (!fontsLoaded || !authLoaded || !themeHydrated || !subscriptionsHydrated) return null;
 
   return (
     <>
