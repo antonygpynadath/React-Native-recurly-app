@@ -30,7 +30,6 @@ const CreateSubscriptionModal = ({ visible, onClose, onSubmit }: CreateSubscript
       currency: "USD",
       frequency: values.frequency,
       category: values.category,
-      status: "active",
       startDate: values.startDate,
       renewalDate: values.renewalDate,
       icon: values.icon,

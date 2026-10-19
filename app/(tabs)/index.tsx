@@ -1,7 +1,7 @@
 import ListHeading from "@/components/ListHeading";
-import SubscriptionCard from "@/components/SubscriptionCard";
 import CreateSubscriptionModal from "@/components/subscription/CreateSubscriptionModal";
 import EditSubscriptionModal from "@/components/subscription/EditSubscriptionModal";
+import SubscriptionCard from "@/components/SubscriptionCard";
 import UpcomingSubscriptionCard from "@/components/UpcomingSubscriptionCard";
 import { HOME_BALANCE } from "@/constants/data";
 import { icons } from "@/constants/icons";
@@ -49,7 +49,6 @@ export default function Index() {
     return subscriptions
       .filter(
         (sub) =>
-          sub.status === "active" &&
           !!sub.renewalDate &&
           dayjs(sub.renewalDate).isAfter(now) &&
           dayjs(sub.renewalDate).isBefore(nextWeek),

@@ -1,5 +1,5 @@
 import { icons } from "@/constants/icons";
-import { formatCurrency, formatStatusLabel, formatSubscriptionDateTime } from "@/lib/utils";
+import { formatCurrency, formatSubscriptionDateTime, getRenewalStatusLabel } from "@/lib/utils";
 // eslint-disable-next-line import/no-named-as-default
 import clsx from "clsx";
 import React from "react";
@@ -22,7 +22,6 @@ const SubscriptionCard = ({
   onEditPress,
   paymentMethod,
   startDate,
-  status,
 }: SubscriptionCardProps) => {
   return (
     <Pressable
@@ -93,7 +92,7 @@ const SubscriptionCard = ({
               <View className="sub-row-copy">
                 <Text className="sub-label">Status:</Text>
                 <Text className="sub-value" numberOfLines={1} ellipsizeMode="tail">
-                  {status ? formatStatusLabel(status) : "--"}
+                  {getRenewalStatusLabel(renewalDate)}
                 </Text>
               </View>
             </View>
