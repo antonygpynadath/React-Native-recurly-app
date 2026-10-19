@@ -172,9 +172,6 @@ export default function Index() {
             onPress={() => {
               handleSubscriptionPress(item);
             }}
-            onEditPress={() => setEditingSubscription(item)}
-            onRenewPress={() => handleRenewSubscription(item.id)}
-            onDeletePress={() => handleDeleteSubscription(item.id)}
           />
         )}
         keyExtractor={(item) => item.id}
