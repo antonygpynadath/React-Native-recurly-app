@@ -213,20 +213,80 @@
         @apply font-sans-bold text-background;
     }
 
-    .sub-actions {
-        @apply mt-2 flex-row gap-2;
+    .sub-menu-btn {
+        @apply ml-2 size-9 shrink-0 items-center justify-center rounded-full;
     }
 
-    .sub-action {
-        @apply flex-1 items-center rounded-full bg-primary py-4;
+    .action-menu-overlay {
+        @apply flex-1 justify-end bg-black/50;
     }
 
-    .sub-action-delete {
+    .action-menu-container {
+        @apply rounded-t-3xl bg-background px-2 pb-8 pt-2;
+    }
+
+    .action-menu-item {
+        @apply items-center px-5 py-4;
+    }
+
+    .action-menu-item-text {
+        @apply text-base font-sans-semibold text-primary;
+    }
+
+    .action-menu-item-destructive {
+        @apply text-destructive;
+    }
+
+    .action-menu-cancel {
+        @apply mt-1 items-center rounded-2xl bg-muted px-5 py-4;
+    }
+
+    .action-menu-cancel-text {
+        @apply text-base font-sans-bold text-primary;
+    }
+
+    .confirm-overlay {
+        @apply flex-1 items-center justify-center bg-black/50 px-6;
+    }
+
+    .confirm-container {
+        @apply w-full rounded-3xl bg-background p-5;
+    }
+
+    .confirm-title {
+        @apply mb-2 text-xl font-sans-bold text-primary;
+    }
+
+    .confirm-message {
+        @apply mb-5 text-base font-sans-medium text-muted-foreground;
+    }
+
+    .confirm-actions {
+        @apply flex-row gap-3;
+    }
+
+    .confirm-btn {
+        @apply flex-1 items-center rounded-full py-3.5;
+    }
+
+    .confirm-btn-cancel {
+        @apply bg-muted;
+    }
+
+    .confirm-btn-primary {
+        @apply bg-primary;
+    }
+
+    .confirm-btn-destructive {
         @apply bg-destructive;
     }
 
-    .sub-action-text {
+    .confirm-btn-text {
         @apply font-sans-bold text-background;
+    }
+
+    .confirm-btn-cancel-text {
+        @apply text-primary;
     }
 
     .home-empty-state {

@@ -1,6 +1,5 @@
 import ListHeading from "@/components/ListHeading";
 import CreateSubscriptionModal from "@/components/subscription/CreateSubscriptionModal";
-import EditSubscriptionModal from "@/components/subscription/EditSubscriptionModal";
 import SubscriptionCard from "@/components/SubscriptionCard";
 import UpcomingSubscriptionCard from "@/components/UpcomingSubscriptionCard";
 import { HOME_BALANCE } from "@/constants/data";
@@ -32,14 +31,7 @@ export default function Index() {
   };
 
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null);
-  const {
-    subscriptions,
-    addSubscription,
-    updateSubscription,
-    deleteSubscription,
-    renewSubscription,
-  } = useSubscriptionStore();
+  const { subscriptions, addSubscription } = useSubscriptionStore();
 
   const [expandedSubscriptionId, setExpandedSubscriptionId] = useState<string | null>(null);
 
@@ -51,20 +43,6 @@ export default function Index() {
       subscription_frequency: newSubscription.frequency ?? "",
       subscription_category: newSubscription.category ?? "",
     });
-  };
-
-  const handleUpdateSubscription = (updatedSubscription: Subscription) => {
-    updateSubscription(updatedSubscription);
-  };
-
-  const handleDeleteSubscription = (id: string) => {
-    deleteSubscription(id);
-    setExpandedSubscriptionId((currentId) => (currentId === id ? null : currentId));
-    setEditingSubscription((current) => (current?.id === id ? null : current));
-  };
-
-  const handleRenewSubscription = (id: string) => {
-    renewSubscription(id);
   };
 
   // Get upcoming subscriptions (active subscriptions with renewal date within next 7 days)
@@ -179,20 +157,13 @@ export default function Index() {
         ItemSeparatorComponent={() => <View className="h-4" />}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={<Text className="home-empty-state">No pending renewals yet.</Text>}
-        contentContainerClassName="pb-20"
+        contentContainerClassName="pb-30"
       />
 
       <CreateSubscriptionModal
         visible={isModalVisible}
         onClose={() => setIsModalVisible(false)}
         onSubmit={handleCreateSubscription}
-      />
-
-      <EditSubscriptionModal
-        visible={!!editingSubscription}
-        subscription={editingSubscription}
-        onClose={() => setEditingSubscription(null)}
-        onSubmit={handleUpdateSubscription}
       />
     </SafeAreaView>
   );

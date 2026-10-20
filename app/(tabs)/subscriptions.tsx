@@ -1,6 +1,9 @@
 import SubscriptionCard from "@/components/SubscriptionCard";
+import CreateSubscriptionModal from "@/components/subscription/CreateSubscriptionModal";
 import EditSubscriptionModal from "@/components/subscription/EditSubscriptionModal";
+import { icons } from "@/constants/icons";
 import { getColors } from "@/constants/theme";
+import { posthog } from "@/lib/posthog";
 import { useSubscriptionStore } from "@/lib/subscriptionStore";
 import { useThemeStore } from "@/lib/themeStore";
 // eslint-disable-next-line import/no-named-as-default
@@ -8,7 +11,7 @@ import clsx from "clsx";
 import dayjs from "dayjs";
 import { router, useLocalSearchParams } from "expo-router";
 import { useMemo, useState } from "react";
-import { FlatList, Pressable, Text, TextInput, View } from "react-native";
+import { FlatList, Image, Pressable, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const FILTERS: { key: SubscriptionListFilter; label: string }[] = [
@@ -29,8 +32,13 @@ const Subscriptions = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null);
-  const { subscriptions, updateSubscription, deleteSubscription, renewSubscription } =
-    useSubscriptionStore();
+  const {
+    subscriptions,
+    addSubscription,
+    updateSubscription,
+    deleteSubscription,
+    renewSubscription,
+  } = useSubscriptionStore();
   const theme = useThemeStore((state) => state.theme);
   const colors = getColors(theme);
 
@@ -38,6 +46,18 @@ const Subscriptions = () => {
     deleteSubscription(id);
     setExpandedId((currentId) => (currentId === id ? null : currentId));
     setEditingSubscription((current) => (current?.id === id ? null : current));
+  };
+
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  const handleCreateSubscription = (newSubscription: Subscription) => {
+    addSubscription(newSubscription);
+    posthog?.capture("subscription_created", {
+      subscription_name: newSubscription.name,
+      subscription_price: newSubscription.price,
+      subscription_frequency: newSubscription.frequency ?? "",
+      subscription_category: newSubscription.category ?? "",
+    });
   };
 
   const filteredSubscriptions = useMemo(() => {
@@ -80,42 +100,51 @@ const Subscriptions = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
+      <View className="pt-5 px-5">
+        <View className="flex-row justify-between items-center mb-5">
+          <Text className="text-3xl font-sans-bold text-primary">Subscriptions</Text>
+          <Pressable
+            onPress={() => {
+              setIsModalVisible(true);
+            }}
+          >
+            <Image
+              source={icons.add}
+              className="home-add-icon"
+              style={{ tintColor: colors.primary }}
+            />
+          </Pressable>
+        </View>
+        <TextInput
+          className="bg-card rounded-xl px-4 py-3 text-primary mb-4"
+          placeholder="Search subscriptions..."
+          placeholderTextColor={colors.mutedForeground}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+        <View className="flex-row gap-2 mb-4">
+          {FILTERS.map(({ key, label }) => {
+            const isActive = selectedFilter === key;
+            return (
+              <Pressable
+                key={key}
+                onPress={() => router.setParams({ filter: key })}
+                className={clsx("category-chip", isActive && "category-chip-active")}
+              >
+                <Text
+                  className={clsx("category-chip-text", isActive && "category-chip-text-active")}
+                >
+                  {label}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      </View>
       <FlatList
         data={filteredSubscriptions}
         keyExtractor={(item) => item.id}
-        ListHeaderComponent={
-          <View className="pt-5">
-            <Text className="text-3xl font-sans-bold text-primary mb-5">Subscriptions</Text>
-            <TextInput
-              className="bg-card rounded-xl px-4 py-3 text-primary mb-4"
-              placeholder="Search subscriptions..."
-              placeholderTextColor={colors.mutedForeground}
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-            />
-            <View className="flex-row gap-2 mb-4">
-              {FILTERS.map(({ key, label }) => {
-                const isActive = selectedFilter === key;
-                return (
-                  <Pressable
-                    key={key}
-                    onPress={() => router.setParams({ filter: key })}
-                    className={clsx("category-chip", isActive && "category-chip-active")}
-                  >
-                    <Text
-                      className={clsx(
-                        "category-chip-text",
-                        isActive && "category-chip-text-active",
-                      )}
-                    >
-                      {label}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-          </View>
-        }
+
         renderItem={({ item }) => (
           <SubscriptionCard
             {...item}
@@ -127,11 +156,13 @@ const Subscriptions = () => {
           />
         )}
         ListEmptyComponent={<Text className="home-empty-state">{emptyMessage}</Text>}
-        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20, gap: 12 }}
+        contentContainerStyle={{ paddingHorizontal: 20, gap: 12 }}
+        contentContainerClassName="pb-30"
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
         extraData={selectedFilter}
+        className="flex-1"
       />
 
       <EditSubscriptionModal
@@ -139,6 +170,12 @@ const Subscriptions = () => {
         subscription={editingSubscription}
         onClose={() => setEditingSubscription(null)}
         onSubmit={updateSubscription}
+      />
+
+      <CreateSubscriptionModal
+        visible={isModalVisible}
+        onClose={() => setIsModalVisible(false)}
+        onSubmit={handleCreateSubscription}
       />
     </SafeAreaView>
   );
