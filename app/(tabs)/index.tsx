@@ -1,14 +1,13 @@
+import BalanceCard from "@/components/BalanceCard";
 import ListHeading from "@/components/ListHeading";
 import CreateSubscriptionModal from "@/components/subscription/CreateSubscriptionModal";
 import SubscriptionCard from "@/components/SubscriptionCard";
 import UpcomingSubscriptionCard from "@/components/UpcomingSubscriptionCard";
-import { HOME_BALANCE } from "@/constants/data";
 import { icons } from "@/constants/icons";
 import { ROUTES } from "@/constants/routes";
 import { getColors } from "@/constants/theme";
 import { useSubscriptionStore } from "@/lib/subscriptionStore";
 import { useThemeStore } from "@/lib/themeStore";
-import { formatCurrency } from "@/lib/utils";
 import { useUser } from "@clerk/expo";
 import dayjs from "dayjs";
 import { useRouter } from "expo-router";
@@ -47,37 +46,49 @@ export default function Index() {
   };
 
   // Upcoming: renewal within next 7 days. Pending: renewal already past.
-  const { upcomingSubscriptions, pendingSubscriptions } = useMemo(() => {
-    const now = dayjs();
-    const nextWeek = now.add(7, "days");
-    const todayStart = now.startOf("day");
+  const { upcomingSubscriptions, pendingSubscriptions, upcomingTotal, nextUpcomingDate } =
+    useMemo(() => {
+      const now = dayjs();
+      const nextWeek = now.add(7, "days");
+      const todayStart = now.startOf("day");
 
-    const upcoming: UpcomingSubscription[] = [];
-    const pending: Subscription[] = [];
+      const upcoming: UpcomingSubscription[] = [];
+      const pending: Subscription[] = [];
+      let upcomingTotal = 0;
+      let nextUpcomingDate: string | undefined;
 
-    for (const sub of subscriptions) {
-      if (!sub.renewalDate) continue;
-      const renewal = dayjs(sub.renewalDate);
+      for (const sub of subscriptions) {
+        if (!sub.renewalDate) continue;
+        const renewal = dayjs(sub.renewalDate);
 
-      if (renewal.isBefore(now)) {
-        pending.push(sub);
-      } else if (renewal.isBefore(nextWeek)) {
-        upcoming.push({
-          id: sub.id,
-          icon: sub.icon,
-          name: sub.name,
-          price: sub.price,
-          currency: sub.currency,
-          daysLeft: renewal.startOf("day").diff(todayStart, "day"),
-        });
+        if (renewal.isBefore(now)) {
+          pending.push(sub);
+        } else if (renewal.isBefore(nextWeek)) {
+          upcoming.push({
+            id: sub.id,
+            icon: sub.icon,
+            name: sub.name,
+            price: sub.price,
+            currency: sub.currency,
+            daysLeft: renewal.startOf("day").diff(todayStart, "day"),
+          });
+          upcomingTotal += sub.price;
+          if (!nextUpcomingDate || renewal.isBefore(dayjs(nextUpcomingDate))) {
+            nextUpcomingDate = sub.renewalDate;
+          }
+        }
       }
-    }
 
-    upcoming.sort((a, b) => a.daysLeft - b.daysLeft);
-    pending.sort((a, b) => dayjs(a.renewalDate).diff(dayjs(b.renewalDate)));
+      upcoming.sort((a, b) => a.daysLeft - b.daysLeft);
+      pending.sort((a, b) => dayjs(a.renewalDate).diff(dayjs(b.renewalDate)));
 
-    return { upcomingSubscriptions: upcoming, pendingSubscriptions: pending };
-  }, [subscriptions]);
+      return {
+        upcomingSubscriptions: upcoming,
+        pendingSubscriptions: pending,
+        upcomingTotal,
+        nextUpcomingDate,
+      };
+    }, [subscriptions]);
 
   const handleSubscriptionPress = (item: Subscription) => {
     const isExpanding = expandedSubscriptionId !== item.id;
@@ -116,15 +127,7 @@ export default function Index() {
               </Pressable>
             </View>
 
-            <View className="home-balance-card">
-              <Text className="home-balance-label">Balance</Text>
-              <View className="home-balance-row">
-                <Text className="home-balance-amount">{formatCurrency(HOME_BALANCE.amount)}</Text>
-                <Text className="home-balance-date">
-                  {dayjs(HOME_BALANCE.nextRenewalDate).format("MM/DD")}
-                </Text>
-              </View>
-            </View>
+            <BalanceCard amount={upcomingTotal} nextDate={nextUpcomingDate} />
 
             <View className="mb-5">
               <ListHeading
