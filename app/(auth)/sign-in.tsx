@@ -1,3 +1,4 @@
+import { ROUTES } from "@/constants/routes";
 import { useSignIn } from "@clerk/expo";
 import { Ionicons } from "@expo/vector-icons";
 import { Link, useRouter, type Href } from "expo-router";
@@ -53,14 +54,14 @@ const SignIn = () => {
             return;
           }
 
-          const url = decorateUrl("/(tabs)");
+          const url = decorateUrl(ROUTES.HOME);
           if (url.startsWith("http")) {
             // Only use window.location on web platform
             if (typeof window !== "undefined" && window.location) {
               window.location.href = url;
             } else {
               // On native, just use router navigation
-              router.replace("/(tabs)" as Href);
+              router.replace(ROUTES.HOME as Href);
             }
           } else {
             router.replace(url as Href);
@@ -96,14 +97,14 @@ const SignIn = () => {
             return;
           }
 
-          const url = decorateUrl("/(tabs)");
+          const url = decorateUrl(ROUTES.HOME);
           if (url.startsWith("http")) {
             // Only use window.location on web platform
             if (typeof window !== "undefined" && window.location) {
               window.location.href = url;
             } else {
               // On native, just use router navigation
-              router.replace("/(tabs)" as Href);
+              router.replace(ROUTES.HOME as Href);
             }
           } else {
             router.replace(url as Href);
@@ -237,7 +238,7 @@ const SignIn = () => {
                     autoCapitalize="none"
                     value={emailAddress}
                     placeholder="name@example.com"
-                    placeholderTextColor="rgba(0, 0, 0, 0.4)"
+                    placeholderTextColor="rgba(255, 255, 255, 0.4)"
                     onChangeText={setEmailAddress}
                     onBlur={() => setEmailTouched(true)}
                     keyboardType="email-address"
@@ -258,7 +259,7 @@ const SignIn = () => {
                       className={`auth-input auth-input-password ${passwordTouched && !passwordValid && "auth-input-error"}`}
                       value={password}
                       placeholder="Enter your password"
-                      placeholderTextColor="rgba(0, 0, 0, 0.4)"
+                      placeholderTextColor="rgba(255, 255, 255, 0.4)"
                       secureTextEntry={!showPassword}
                       onChangeText={setPassword}
                       onBlur={() => setPasswordTouched(true)}
@@ -274,7 +275,7 @@ const SignIn = () => {
                       <Ionicons
                         name={showPassword ? "eye-off-outline" : "eye-outline"}
                         size={22}
-                        color="rgba(0, 0, 0, 0.45)"
+                        color="rgba(255, 255, 255, 0.4)"
                       />
                     </Pressable>
                   </View>
@@ -306,7 +307,7 @@ const SignIn = () => {
             {/* Sign-Up Link */}
             <View className="auth-link-row">
               <Text className="auth-link-copy">Don&apos;t have an account?</Text>
-              <Link href="/(auth)/sign-up" asChild>
+              <Link href={ROUTES.SIGN_UP} asChild>
                 <Pressable>
                   <Text className="auth-link">Create Account</Text>
                 </Pressable>

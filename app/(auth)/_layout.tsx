@@ -1,3 +1,4 @@
+import { ROUTES } from "@/constants/routes";
 import { useAuth } from "@clerk/expo";
 import { Redirect, Stack } from "expo-router";
 
@@ -11,7 +12,7 @@ export default function AuthLayout() {
 
   // If the user is signed in, redirect to the tabs screen
   if (isSignedIn) {
-    return <Redirect href="/(tabs)" />;
+    return <Redirect href={ROUTES.HOME} />;
   }
 
   return <Stack screenOptions={{ headerShown: false }} />;
