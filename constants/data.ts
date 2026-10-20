@@ -19,7 +19,7 @@ export const HOME_BALANCE = {
 export const UPCOMING_SUBSCRIPTIONS: UpcomingSubscription[] = [
   {
     id: "spotify",
-    icon: icons.spotify,
+    icon: "spotify",
     name: "Spotify",
     price: 5.99,
     currency: "USD",
@@ -27,7 +27,7 @@ export const UPCOMING_SUBSCRIPTIONS: UpcomingSubscription[] = [
   },
   {
     id: "notion",
-    icon: icons.notion,
+    icon: "notion",
     name: "Notion",
     price: 12.0,
     currency: "USD",
@@ -35,7 +35,7 @@ export const UPCOMING_SUBSCRIPTIONS: UpcomingSubscription[] = [
   },
   {
     id: "figma",
-    icon: icons.figma,
+    icon: "figma",
     name: "Figma",
     price: 15.0,
     currency: "USD",
@@ -46,12 +46,11 @@ export const UPCOMING_SUBSCRIPTIONS: UpcomingSubscription[] = [
 export const HOME_SUBSCRIPTIONS: Subscription[] = [
   {
     id: "adobe-creative-cloud",
-    icon: icons.adobe,
+    icon: "adobe",
     name: "Adobe Creative Cloud",
     plan: "Teams Plan",
     category: "Design",
     paymentMethod: "Visa ending in 8530",
-    status: "active",
     startDate: "2025-03-20T10:00:00.000Z",
     price: 77.49,
     currency: "USD",
@@ -61,12 +60,11 @@ export const HOME_SUBSCRIPTIONS: Subscription[] = [
   },
   {
     id: "github-pro",
-    icon: icons.github,
+    icon: "github",
     name: "GitHub Pro",
     plan: "Developer",
     category: "Developer Tools",
     paymentMethod: "Mastercard ending in 2408",
-    status: "active",
     startDate: "2024-11-24T10:00:00.000Z",
     price: 9.99,
     currency: "USD",
@@ -76,12 +74,11 @@ export const HOME_SUBSCRIPTIONS: Subscription[] = [
   },
   {
     id: "claude-pro",
-    icon: icons.claude,
+    icon: "claude",
     name: "Claude Pro",
     plan: "Pro Plan",
     category: "AI Tools",
     paymentMethod: "Amex ending in 1010",
-    status: "paused",
     startDate: "2025-06-27T10:00:00.000Z",
     price: 20.0,
     currency: "USD",
@@ -91,12 +88,11 @@ export const HOME_SUBSCRIPTIONS: Subscription[] = [
   },
   {
     id: "canva-pro",
-    icon: icons.canva,
+    icon: "canva",
     name: "Canva Pro",
     plan: "Yearly Access",
     category: "Design",
     paymentMethod: "Visa ending in 7784",
-    status: "cancelled",
     startDate: "2024-04-02T10:00:00.000Z",
     price: 119.99,
     currency: "USD",

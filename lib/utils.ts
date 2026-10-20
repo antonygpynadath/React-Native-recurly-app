@@ -23,3 +23,10 @@ export const formatStatusLabel = (value?: string): string => {
   if (!value) return "Unknown";
   return value.charAt(0).toUpperCase() + value.slice(1);
 };
+
+export const getRenewalStatusLabel = (renewalDate?: string): string => {
+  if (!renewalDate) return "--";
+  const parsedDate = dayjs(renewalDate);
+  if (!parsedDate.isValid()) return "--";
+  return parsedDate.isBefore(dayjs()) ? "Pending" : "Active";
+};

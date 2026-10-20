@@ -2,6 +2,40 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  :root {
+    --color-background: 255 249 227;
+    --color-foreground: 8 17 38;
+    --color-card: 255 248 231;
+    --color-muted: 246 238 207;
+    --color-muted-foreground: rgba(0, 0, 0, 0.6);
+    --color-primary: 8 17 38;
+    --color-accent: 234 122 83;
+    --color-border: rgba(0, 0, 0, 0.1);
+    --color-success: 22 163 74;
+    --color-destructive: 220 38 38;
+    --color-subscription: 143 209 189;
+    --color-nav: 8 17 38;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-background: 12 18 34;
+      --color-foreground: 255 249 227;
+      --color-card: 21 29 51;
+      --color-muted: 26 34 56;
+      --color-muted-foreground: rgba(255, 249, 227, 0.6);
+      --color-primary: 255 249 227;
+      --color-accent: 234 122 83;
+      --color-border: rgba(255, 249, 227, 0.12);
+      --color-success: 22 163 74;
+      --color-destructive: 220 38 38;
+      --color-subscription: 61 122 106;
+      --color-nav: 8 17 38;
+    }
+  }
+}
+
 @layer components {
     .tabs-icon {
         @apply size-12 items-center justify-center;
@@ -68,7 +102,7 @@
     }
 
     .list-action {
-        @apply rounded-full border border-black/20 px-4 py-1;
+        @apply rounded-full border border-border px-4 py-1;
     }
 
     .list-action-text {
@@ -76,7 +110,7 @@
     }
 
     .upcoming-card {
-        @apply mr-4 w-44 rounded-2xl border border-black/10 bg-background p-4;
+        @apply mr-4 w-44 rounded-2xl border border-border bg-background p-4;
     }
 
     .upcoming-row {
@@ -179,8 +213,84 @@
         @apply font-sans-bold text-background;
     }
 
+    .sub-menu-btn {
+        @apply ml-2 size-9 shrink-0 items-center justify-center rounded-full;
+    }
+
+    .action-menu-overlay {
+        @apply flex-1 justify-end bg-black/50;
+    }
+
+    .action-menu-container {
+        @apply rounded-t-3xl bg-background px-2 pb-8 pt-2;
+    }
+
+    .action-menu-item {
+        @apply items-center px-5 py-4;
+    }
+
+    .action-menu-item-text {
+        @apply text-base font-sans-semibold text-primary;
+    }
+
+    .action-menu-item-destructive {
+        @apply text-destructive;
+    }
+
+    .action-menu-cancel {
+        @apply mt-1 items-center rounded-2xl bg-muted px-5 py-4;
+    }
+
+    .action-menu-cancel-text {
+        @apply text-base font-sans-bold text-primary;
+    }
+
+    .confirm-overlay {
+        @apply flex-1 items-center justify-center bg-black/50 px-6;
+    }
+
+    .confirm-container {
+        @apply w-full rounded-3xl bg-background p-5;
+    }
+
+    .confirm-title {
+        @apply mb-2 text-xl font-sans-bold text-primary;
+    }
+
+    .confirm-message {
+        @apply mb-5 text-base font-sans-medium text-muted-foreground;
+    }
+
+    .confirm-actions {
+        @apply flex-row gap-3;
+    }
+
+    .confirm-btn {
+        @apply flex-1 items-center rounded-full py-3.5;
+    }
+
+    .confirm-btn-cancel {
+        @apply bg-muted;
+    }
+
+    .confirm-btn-primary {
+        @apply bg-primary;
+    }
+
+    .confirm-btn-destructive {
+        @apply bg-destructive;
+    }
+
+    .confirm-btn-text {
+        @apply font-sans-bold text-background;
+    }
+
+    .confirm-btn-cancel-text {
+        @apply text-primary;
+    }
+
     .home-empty-state {
-        @apply py-4 text-sm font-sans-medium text-black/60;
+        @apply py-4 text-sm font-sans-medium text-muted-foreground;
     }
 
     .auth-safe-area {
@@ -385,5 +495,69 @@
 
     .category-chip-text-active {
         @apply text-accent;
+    }
+
+    .icon-picker-search {
+        @apply mx-5 mt-4 mb-3 flex-row items-center gap-2 rounded-2xl border border-border bg-muted px-4 py-3;
+    }
+
+    .icon-picker-search-input {
+        @apply flex-1 text-base font-sans-medium text-primary;
+    }
+
+    .icon-picker-card {
+        @apply flex-1 items-center justify-center gap-2 rounded-2xl border border-border bg-card py-3 px-1;
+    }
+
+    .icon-picker-card-active {
+        @apply border-accent bg-accent/10;
+    }
+
+    .icon-picker-card-image {
+        @apply size-8;
+    }
+
+    .icon-picker-card-label {
+        @apply text-xs font-sans-semibold text-muted-foreground;
+    }
+
+    .icon-picker-card-label-active {
+        @apply text-accent;
+    }
+
+    .icon-picker-footer {
+        @apply flex-row items-center justify-between gap-3 border-t border-border px-5 py-4;
+    }
+
+    .icon-picker-selected {
+        @apply flex-1 text-sm font-sans-medium text-muted-foreground;
+    }
+
+    .icon-picker-confirm {
+        @apply rounded-2xl bg-muted px-4 py-3;
+    }
+
+    .icon-picker-confirm-text {
+        @apply text-sm font-sans-bold text-primary;
+    }
+
+    .icon-field-row {
+        @apply flex-row items-center gap-3;
+    }
+
+    .icon-field-preview {
+        @apply size-14 items-center justify-center rounded-2xl border border-border bg-muted;
+    }
+
+    .icon-field-preview-image {
+        @apply size-8;
+    }
+
+    .icon-field-button {
+        @apply flex-1 items-center rounded-2xl border border-border bg-background py-3;
+    }
+
+    .icon-field-button-text {
+        @apply text-sm font-sans-semibold text-primary;
     }
 }

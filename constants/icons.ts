@@ -18,24 +18,34 @@ import spotify from "@/assets/icons/spotify.png";
 import wallet from "@/assets/icons/wallet.png";
 
 export const icons = {
-    home,
-    wallet,
-    setting,
-    activity,
-    add,
-    back,
-    menu,
-    plus,
-    notion,
-    dropbox,
-    openai,
-    adobe,
-    medium,
-    figma,
-    spotify,
-    github,
-    claude,
-    canva,
+  home,
+  wallet,
+  setting,
+  activity,
+  add,
+  back,
+  menu,
+  plus,
+  notion,
+  dropbox,
+  openai,
+  adobe,
+  medium,
+  figma,
+  spotify,
+  github,
+  claude,
+  canva,
 } as const;
 
 export type IconKey = keyof typeof icons;
+
+const CHROME_ICON_KEYS = new Set<IconKey>(["back", "menu", "plus", "add"]);
+
+export const SUBSCRIPTION_ICON_KEYS = (Object.keys(icons) as IconKey[]).filter(
+  (key) => !CHROME_ICON_KEYS.has(key),
+);
+
+export const DEFAULT_SUBSCRIPTION_ICON: IconKey = "wallet";
+
+export const formatIconLabel = (key: IconKey): string => key.charAt(0).toUpperCase() + key.slice(1);

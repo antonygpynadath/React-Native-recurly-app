@@ -1,6 +1,7 @@
 import { tabs } from "@/constants/data";
 
-import { colors, components } from "@/constants/theme";
+import { components, getColors } from "@/constants/theme";
+import { useThemeStore } from "@/lib/themeStore";
 import { useAuth } from "@clerk/expo";
 // eslint-disable-next-line import/no-named-as-default
 import clsx from "clsx";
@@ -24,6 +25,8 @@ const TabIcon = ({ focused, icon }: TabIconProps) => {
 const TabsLayout = () => {
   const { isSignedIn, isLoaded } = useAuth();
   const insets = useSafeAreaInsets();
+  const theme = useThemeStore((state) => state.theme);
+  const colors = getColors(theme);
 
   // Wait for the auth state to be loaded before rendering the layout
   if (!isLoaded) {
@@ -46,7 +49,7 @@ const TabsLayout = () => {
           height: tabBar.height,
           marginHorizontal: tabBar.horizontalInset,
           borderRadius: tabBar.radius,
-          backgroundColor: colors.primary,
+          backgroundColor: colors.nav,
           borderTopWidth: 0,
           elevation: 0,
         },

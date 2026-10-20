@@ -1,22 +1,34 @@
-import CreateSubscriptionModal from "@/components/CreateSubscriptionModal";
 import ListHeading from "@/components/ListHeading";
+import CreateSubscriptionModal from "@/components/subscription/CreateSubscriptionModal";
 import SubscriptionCard from "@/components/SubscriptionCard";
 import UpcomingSubscriptionCard from "@/components/UpcomingSubscriptionCard";
 import { HOME_BALANCE } from "@/constants/data";
 import { icons } from "@/constants/icons";
+import { getColors } from "@/constants/theme";
 import { useSubscriptionStore } from "@/lib/subscriptionStore";
+import { useThemeStore } from "@/lib/themeStore";
 import { formatCurrency } from "@/lib/utils";
 import { useUser } from "@clerk/expo";
 import dayjs from "dayjs";
+import { useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import { FlatList, Image, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import images from "../../constants/images";
-import "../../global.css";
 import { posthog } from "../../lib/posthog";
 
 export default function Index() {
   const { user } = useUser();
+  const router = useRouter();
+  const theme = useThemeStore((state) => state.theme);
+  const colors = getColors(theme);
+
+  const navigateToSubscriptions = (filter: SubscriptionListFilter) => {
+    router.push({
+      pathname: "/subscriptions",
+      params: { filter },
+    });
+  };
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const { subscriptions, addSubscription } = useSubscriptionStore();
@@ -40,7 +52,6 @@ export default function Index() {
     return subscriptions
       .filter(
         (sub) =>
-          sub.status === "active" &&
           !!sub.renewalDate &&
           dayjs(sub.renewalDate).isAfter(now) &&
           dayjs(sub.renewalDate).isBefore(nextWeek),
@@ -54,6 +65,12 @@ export default function Index() {
         currency: sub.currency,
         daysLeft: dayjs(sub.renewalDate).startOf("day").diff(dayjs().startOf("day"), "day"),
       }));
+  }, [subscriptions]);
+
+  const pendingSubscriptions = useMemo(() => {
+    return subscriptions
+      .filter((sub) => !!sub.renewalDate && dayjs(sub.renewalDate).isBefore(dayjs()))
+      .sort((a, b) => dayjs(a.renewalDate).diff(dayjs(b.renewalDate)));
   }, [subscriptions]);
 
   const handleSubscriptionPress = (item: Subscription) => {
@@ -72,7 +89,7 @@ export default function Index() {
   return (
     <SafeAreaView className="flex-1 p-5 bg-background">
       <FlatList
-        data={subscriptions}
+        data={pendingSubscriptions}
         ListHeaderComponent={() => (
           <>
             <View className="home-header">
@@ -85,7 +102,11 @@ export default function Index() {
                   setIsModalVisible(true);
                 }}
               >
-                <Image source={icons.add} className="home-add-icon" />
+                <Image
+                  source={icons.add}
+                  className="home-add-icon"
+                  style={{ tintColor: colors.primary }}
+                />
               </Pressable>
             </View>
 
@@ -100,7 +121,10 @@ export default function Index() {
             </View>
 
             <View className="mb-5">
-              <ListHeading title="Upcoming" />
+              <ListHeading
+                title="Upcoming"
+                onViewAllPress={() => navigateToSubscriptions("upcoming")}
+              />
               <FlatList
                 data={upcomingSubscriptions}
                 renderItem={({ item }) => <UpcomingSubscriptionCard {...item} />}
@@ -113,7 +137,10 @@ export default function Index() {
               />
             </View>
 
-            <ListHeading title="All Subscriptions" />
+            <ListHeading
+              title="Pending"
+              onViewAllPress={() => navigateToSubscriptions("pending")}
+            />
           </>
         )}
         renderItem={({ item }) => (
@@ -129,8 +156,8 @@ export default function Index() {
         extraData={expandedSubscriptionId}
         ItemSeparatorComponent={() => <View className="h-4" />}
         showsVerticalScrollIndicator={false}
-        ListEmptyComponent={<Text className="home-empty-state">No subscriptions yet.</Text>}
-        contentContainerClassName="pb-20"
+        ListEmptyComponent={<Text className="home-empty-state">No pending renewals yet.</Text>}
+        contentContainerClassName="pb-30"
       />
 
       <CreateSubscriptionModal
