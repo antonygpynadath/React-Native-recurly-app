@@ -52,7 +52,7 @@ const TabsLayout = () => {
           borderRadius: tabBar.radius,
           backgroundColor: colors.nav,
           borderTopWidth: 0,
-          elevation: 0,
+          elevation: 10,
         },
         tabBarItemStyle: {
           paddingVertical: tabBar.height / 2 - tabBar.iconFrame / 1.6,

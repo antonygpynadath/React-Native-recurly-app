@@ -4,6 +4,7 @@ import SubscriptionCard from "@/components/SubscriptionCard";
 import UpcomingSubscriptionCard from "@/components/UpcomingSubscriptionCard";
 import { HOME_BALANCE } from "@/constants/data";
 import { icons } from "@/constants/icons";
+import { ROUTES } from "@/constants/routes";
 import { getColors } from "@/constants/theme";
 import { useSubscriptionStore } from "@/lib/subscriptionStore";
 import { useThemeStore } from "@/lib/themeStore";
@@ -25,7 +26,7 @@ export default function Index() {
 
   const navigateToSubscriptions = (filter: SubscriptionListFilter) => {
     router.push({
-      pathname: "/subscriptions",
+      pathname: ROUTES.SUBSCRIPTIONS,
       params: { filter },
     });
   };
@@ -45,32 +46,37 @@ export default function Index() {
     });
   };
 
-  // Get upcoming subscriptions (active subscriptions with renewal date within next 7 days)
-  const upcomingSubscriptions = useMemo(() => {
+  // Upcoming: renewal within next 7 days. Pending: renewal already past.
+  const { upcomingSubscriptions, pendingSubscriptions } = useMemo(() => {
     const now = dayjs();
-    const nextWeek = dayjs().add(7, "days");
-    return subscriptions
-      .filter(
-        (sub) =>
-          !!sub.renewalDate &&
-          dayjs(sub.renewalDate).isAfter(now) &&
-          dayjs(sub.renewalDate).isBefore(nextWeek),
-      )
-      .sort((a, b) => dayjs(a.renewalDate).diff(dayjs(b.renewalDate)))
-      .map((sub) => ({
-        id: sub.id,
-        icon: sub.icon,
-        name: sub.name,
-        price: sub.price,
-        currency: sub.currency,
-        daysLeft: dayjs(sub.renewalDate).startOf("day").diff(dayjs().startOf("day"), "day"),
-      }));
-  }, [subscriptions]);
+    const nextWeek = now.add(7, "days");
+    const todayStart = now.startOf("day");
 
-  const pendingSubscriptions = useMemo(() => {
-    return subscriptions
-      .filter((sub) => !!sub.renewalDate && dayjs(sub.renewalDate).isBefore(dayjs()))
-      .sort((a, b) => dayjs(a.renewalDate).diff(dayjs(b.renewalDate)));
+    const upcoming: UpcomingSubscription[] = [];
+    const pending: Subscription[] = [];
+
+    for (const sub of subscriptions) {
+      if (!sub.renewalDate) continue;
+      const renewal = dayjs(sub.renewalDate);
+
+      if (renewal.isBefore(now)) {
+        pending.push(sub);
+      } else if (renewal.isBefore(nextWeek)) {
+        upcoming.push({
+          id: sub.id,
+          icon: sub.icon,
+          name: sub.name,
+          price: sub.price,
+          currency: sub.currency,
+          daysLeft: renewal.startOf("day").diff(todayStart, "day"),
+        });
+      }
+    }
+
+    upcoming.sort((a, b) => a.daysLeft - b.daysLeft);
+    pending.sort((a, b) => dayjs(a.renewalDate).diff(dayjs(b.renewalDate)));
+
+    return { upcomingSubscriptions: upcoming, pendingSubscriptions: pending };
   }, [subscriptions]);
 
   const handleSubscriptionPress = (item: Subscription) => {

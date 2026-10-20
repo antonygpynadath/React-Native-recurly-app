@@ -32,6 +32,7 @@ const Subscriptions = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null);
+
   const {
     subscriptions,
     addSubscription,
@@ -39,9 +40,11 @@ const Subscriptions = () => {
     deleteSubscription,
     renewSubscription,
   } = useSubscriptionStore();
+
   const theme = useThemeStore((state) => state.theme);
   const colors = getColors(theme);
 
+  //function to delete a subscription
   const handleDeleteSubscription = (id: string) => {
     deleteSubscription(id);
     setExpandedId((currentId) => (currentId === id ? null : currentId));
@@ -50,6 +53,7 @@ const Subscriptions = () => {
 
   const [isModalVisible, setIsModalVisible] = useState(false);
 
+  //function to create a subscription
   const handleCreateSubscription = (newSubscription: Subscription) => {
     addSubscription(newSubscription);
     posthog?.capture("subscription_created", {
