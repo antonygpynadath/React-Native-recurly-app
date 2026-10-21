@@ -8,6 +8,7 @@ import { useEffect, useRef } from "react";
 import { posthog } from "../lib/posthog";
 import { useSubscriptionStore } from "../lib/subscriptionStore";
 import { useThemeStore } from "../lib/themeStore";
+import { useNotifications } from "../lib/useNotifications";
 import "../global.css";
 
 SplashScreen.preventAutoHideAsync();
@@ -26,6 +27,8 @@ function RootLayoutContent() {
   const hydrateTheme = useThemeStore((state) => state.hydrate);
   const subscriptionsHydrated = useSubscriptionStore((state) => state.hydrated);
   const hydrateSubscriptions = useSubscriptionStore((state) => state.hydrate);
+
+  useNotifications();
 
   const [fontsLoaded] = useFonts({
     "sans-regular": require("../assets/fonts/PlusJakartaSans-Regular.ttf"),
