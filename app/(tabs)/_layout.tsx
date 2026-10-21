@@ -1,4 +1,5 @@
 import { tabs } from "@/constants/data";
+import { ROUTES } from "@/constants/routes";
 
 import { components, getColors } from "@/constants/theme";
 import { useThemeStore } from "@/lib/themeStore";
@@ -35,7 +36,7 @@ const TabsLayout = () => {
 
   // If the user is not signed in, redirect to the sign-in screen
   if (!isSignedIn) {
-    return <Redirect href="/(auth)/sign-in" />;
+    return <Redirect href={ROUTES.SIGN_IN} />;
   }
 
   return (
@@ -51,7 +52,7 @@ const TabsLayout = () => {
           borderRadius: tabBar.radius,
           backgroundColor: colors.nav,
           borderTopWidth: 0,
-          elevation: 0,
+          elevation: 10,
         },
         tabBarItemStyle: {
           paddingVertical: tabBar.height / 2 - tabBar.iconFrame / 1.6,

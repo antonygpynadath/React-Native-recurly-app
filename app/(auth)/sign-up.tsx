@@ -1,3 +1,4 @@
+import { ROUTES } from "@/constants/routes";
 import { useAuth, useSignUp } from "@clerk/expo";
 import { Ionicons } from "@expo/vector-icons";
 import { Link, useRouter, type Href } from "expo-router";
@@ -65,14 +66,14 @@ const SignUp = () => {
             return;
           }
 
-          const url = decorateUrl("/(tabs)");
+          const url = decorateUrl(ROUTES.HOME);
           if (url.startsWith("http")) {
             // Only use window.location on web platform
             if (typeof window !== "undefined" && window.location) {
               window.location.href = url;
             } else {
               // On native, just use router navigation
-              router.replace("/(tabs)" as Href);
+              router.replace(ROUTES.HOME as Href);
             }
           } else {
             router.replace(url as Href);
@@ -133,7 +134,7 @@ const SignUp = () => {
                       className="auth-input"
                       value={code}
                       placeholder="Enter 6-digit code"
-                      placeholderTextColor="rgba(0, 0, 0, 0.4)"
+                      placeholderTextColor="rgba(255, 255, 255, 0.4)"
                       onChangeText={setCode}
                       keyboardType="number-pad"
                       autoComplete="one-time-code"
@@ -210,7 +211,7 @@ const SignUp = () => {
                     autoCapitalize="none"
                     value={emailAddress}
                     placeholder="name@example.com"
-                    placeholderTextColor="rgba(0, 0, 0, 0.4)"
+                    placeholderTextColor="rgba(255, 255, 255, 0.4)"
                     onChangeText={setEmailAddress}
                     onBlur={() => setEmailTouched(true)}
                     keyboardType="email-address"
@@ -231,7 +232,7 @@ const SignUp = () => {
                       className={`auth-input auth-input-password ${passwordTouched && !passwordValid && "auth-input-error"}`}
                       value={password}
                       placeholder="Create a strong password"
-                      placeholderTextColor="rgba(0, 0, 0, 0.4)"
+                      placeholderTextColor="rgba(255, 255, 255, 0.4)"
                       secureTextEntry={!showPassword}
                       onChangeText={setPassword}
                       onBlur={() => setPasswordTouched(true)}
@@ -247,7 +248,7 @@ const SignUp = () => {
                       <Ionicons
                         name={showPassword ? "eye-off-outline" : "eye-outline"}
                         size={22}
-                        color="rgba(0, 0, 0, 0.45)"
+                        color="rgba(255, 255, 255, 0.4)"
                       />
                     </Pressable>
                   </View>
@@ -277,7 +278,7 @@ const SignUp = () => {
             {/* Sign-In Link */}
             <View className="auth-link-row">
               <Text className="auth-link-copy">Already have an account?</Text>
-              <Link href="/(auth)/sign-in" asChild>
+              <Link href={ROUTES.SIGN_IN} asChild>
                 <Pressable>
                   <Text className="auth-link">Sign In</Text>
                 </Pressable>

@@ -55,6 +55,57 @@ declare global {
     title: string;
     onViewAllPress?: () => void;
   }
+
+  interface SpendSummary {
+    monthlyTotal: number;
+    yearlyProjection: number;
+    activeCount: number;
+  }
+
+  interface CategoryBreakdownItem {
+    category: string;
+    amount: number;
+    percent: number;
+  }
+
+  interface RenewalForecastMonth {
+    key: string;
+    label: string;
+    amount: number;
+  }
+
+  interface TopSubscriptionItem {
+    id: string;
+    icon: IconKey;
+    name: string;
+    category: string;
+    currency?: string;
+    color?: string;
+    monthlyAmount: number;
+  }
+
+  interface SpendSummaryCardProps {
+    monthlyTotal: number;
+    yearlyProjection: number;
+    activeCount: number;
+  }
+
+  interface CategoryBreakdownProps {
+    items: CategoryBreakdownItem[];
+  }
+
+  interface RenewalForecastChartProps {
+    months: RenewalForecastMonth[];
+  }
+
+  interface TopSubscriptionRowProps {
+    icon: IconKey;
+    name: string;
+    category: string;
+    currency?: string;
+    color?: string;
+    monthlyAmount: number;
+  }
 }
 
 export {};
