@@ -14,6 +14,9 @@ const RENEWAL_REMINDER_HOUR = 9;
 /** Opens the upcoming-subscriptions filter when the user taps a renewal reminder. */
 const SUBSCRIPTIONS_DEEP_LINK = "recurly:///(tabs)/subscriptions?filter=upcoming";
 
+/** Opens the full subscriptions list when the user taps a create confirmation. */
+const ALL_SUBSCRIPTIONS_DEEP_LINK = "recurly:///(tabs)/subscriptions";
+
 // Show banners/sounds even while the app is in the foreground.
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -24,21 +27,14 @@ Notifications.setNotificationHandler({
   }),
 });
 
-const renewalIdentifier = (subscriptionId: string) =>
-  `${RENEWAL_ID_PREFIX}${subscriptionId}`;
+const renewalIdentifier = (subscriptionId: string) => `${RENEWAL_ID_PREFIX}${subscriptionId}`;
 
 /**
- * Requests permission and returns an Expo push token for remote notifications.
- * Returns null on web, simulators, missing permission, or missing EAS projectId.
+ * Ensures Android channel + notification permission for local (and push) delivery.
+ * Does not require a physical device or EAS projectId.
  */
-export async function registerForPushNotificationsAsync(): Promise<string | null> {
-  if (Platform.OS === "web") return null;
-
-  // Expo push tokens are only available on physical devices.
-  if (!Device.isDevice) {
-    console.warn("Push notifications require a physical device");
-    return null;
-  }
+export async function ensureNotificationPermissionsAsync(): Promise<boolean> {
+  if (Platform.OS === "web") return false;
 
   // Android 8+ requires a channel before notifications can be delivered.
   if (Platform.OS === "android") {
@@ -58,12 +54,30 @@ export async function registerForPushNotificationsAsync(): Promise<string | null
   }
   if (finalStatus !== "granted") {
     console.warn("Notification permission not granted");
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * Requests permission and returns an Expo push token for remote notifications.
+ * Returns null on web, simulators, missing permission, or missing EAS projectId.
+ */
+export async function registerForPushNotificationsAsync(): Promise<string | null> {
+  if (Platform.OS === "web") return null;
+
+  // Expo push tokens are only available on physical devices.
+  if (!Device.isDevice) {
+    console.warn("Push notifications require a physical device");
     return null;
   }
 
+  const granted = await ensureNotificationPermissionsAsync();
+  if (!granted) return null;
+
   // Required by getExpoPushTokenAsync in SDK 49+.
-  const projectId =
-    Constants.expoConfig?.extra?.eas?.projectId ?? Constants.easConfig?.projectId;
+  const projectId = Constants.expoConfig?.extra?.eas?.projectId ?? Constants.easConfig?.projectId;
   if (!projectId) {
     console.warn("EAS projectId not found; cannot get Expo push token");
     return null;
@@ -76,6 +90,36 @@ export async function registerForPushNotificationsAsync(): Promise<string | null
     console.error("Failed to get Expo push token:", error);
     return null;
   }
+}
+
+/**
+ * Shows an immediate local notification confirming a new subscription was added.
+ * Does not require an Expo push token — fires entirely on-device.
+ */
+export async function notifySubscriptionCreated(subscription: Subscription): Promise<void> {
+  if (Platform.OS === "web") return;
+
+  const granted = await ensureNotificationPermissionsAsync();
+  if (!granted) return;
+
+  const currency = subscription.currency ?? "USD";
+  const priceLabel = formatCurrency(subscription.price, currency);
+  const period = subscription.frequency ?? subscription.billing;
+  const periodSuffix = period === "Monthly" ? "/mo" : period === "Yearly" ? "/yr" : "";
+
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: "Subscription added",
+      body: `${subscription.name} · ${priceLabel}${periodSuffix}`,
+      data: {
+        url: ALL_SUBSCRIPTIONS_DEEP_LINK,
+        subscriptionId: subscription.id,
+      },
+      sound: "default",
+      ...(Platform.OS === "android" ? { channelId: "default" } : {}),
+    },
+    trigger: null,
+  });
 }
 
 /**
@@ -177,9 +221,7 @@ const responseKey = (response: Notifications.NotificationResponse) =>
  * Subscribes to notification tap events (foreground and cold start).
  * Returns a cleanup function that removes both listeners.
  */
-export function addNotificationListeners({
-  onResponse,
-}: NotificationListenersOptions): () => void {
+export function addNotificationListeners({ onResponse }: NotificationListenersOptions): () => void {
   const handleResponse = (response: Notifications.NotificationResponse) => {
     const key = responseKey(response);
     if (handledResponseKeys.has(key)) return;
