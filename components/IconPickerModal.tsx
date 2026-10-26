@@ -6,20 +6,12 @@ import {
   type IconKey,
 } from "@/constants/icons";
 import { getColors } from "@/constants/theme";
-import { useThemeStore } from "@/lib/themeStore";
+import { useThemeStore } from "@/zustand/themeStore";
 import { Ionicons } from "@expo/vector-icons";
 // eslint-disable-next-line import/no-named-as-default
 import clsx from "clsx";
 import React, { useEffect, useMemo, useState } from "react";
-import {
-  FlatList,
-  Image,
-  Modal,
-  Pressable,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { FlatList, Image, Modal, Pressable, Text, TextInput, View } from "react-native";
 
 interface IconPickerModalProps {
   visible: boolean;
@@ -28,12 +20,7 @@ interface IconPickerModalProps {
   onConfirm: (icon: IconKey) => void;
 }
 
-const IconPickerModal = ({
-  visible,
-  selectedIcon,
-  onClose,
-  onConfirm,
-}: IconPickerModalProps) => {
+const IconPickerModal = ({ visible, selectedIcon, onClose, onConfirm }: IconPickerModalProps) => {
   const theme = useThemeStore((state) => state.theme);
   const colors = getColors(theme);
   const [draftIcon, setDraftIcon] = useState<IconKey>(selectedIcon);
@@ -99,10 +86,7 @@ const IconPickerModal = ({
               const isSelected = item === draftIcon;
               return (
                 <Pressable
-                  className={clsx(
-                    "icon-picker-card",
-                    isSelected && "icon-picker-card-active",
-                  )}
+                  className={clsx("icon-picker-card", isSelected && "icon-picker-card-active")}
                   onPress={() => setDraftIcon(item)}
                 >
                   <Image source={icons[item]} className="icon-picker-card-image" />

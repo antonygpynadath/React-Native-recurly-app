@@ -8,7 +8,7 @@ import {
   getSpendSummary,
   getTopSubscriptions,
 } from "@/lib/insights";
-import { useSubscriptionStore } from "@/lib/subscriptionStore";
+import { useSubscriptionStore } from "@/zustand/subscriptionStore";
 import { useMemo } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";

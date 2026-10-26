@@ -1,8 +1,8 @@
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { icons } from "@/constants/icons";
 import { getColors } from "@/constants/theme";
-import { useThemeStore } from "@/lib/themeStore";
 import { formatCurrency, formatSubscriptionDateTime, getRenewalStatusLabel } from "@/lib/utils";
+import { useThemeStore } from "@/zustand/themeStore";
 import { Ionicons } from "@expo/vector-icons";
 // eslint-disable-next-line import/no-named-as-default
 import clsx from "clsx";
