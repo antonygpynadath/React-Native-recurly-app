@@ -4,8 +4,8 @@ import EditSubscriptionModal from "@/components/subscription/EditSubscriptionMod
 import { icons } from "@/constants/icons";
 import { getColors } from "@/constants/theme";
 import { posthog } from "@/lib/posthog";
-import { useSubscriptionStore } from "@/lib/subscriptionStore";
-import { useThemeStore } from "@/lib/themeStore";
+import { useSubscriptionStore } from "@/zustand/subscriptionStore";
+import { useThemeStore } from "@/zustand/themeStore";
 // eslint-disable-next-line import/no-named-as-default
 import clsx from "clsx";
 import dayjs from "dayjs";

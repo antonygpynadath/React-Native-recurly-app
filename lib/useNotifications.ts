@@ -4,7 +4,7 @@ import {
   registerForPushNotificationsAsync,
   syncRenewalReminders,
 } from "@/lib/notifications";
-import { useSubscriptionStore } from "@/lib/subscriptionStore";
+import { useSubscriptionStore } from "@/zustand/subscriptionStore";
 import * as Linking from "expo-linking";
 import { useRouter } from "expo-router";
 import { useEffect } from "react";
