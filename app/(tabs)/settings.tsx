@@ -1,5 +1,5 @@
 import images from "@/constants/images";
-import { useThemeStore } from "@/lib/themeStore";
+import { useThemeStore } from "@/zustand/themeStore";
 import { useClerk, useUser } from "@clerk/expo";
 import { Image, Pressable, Switch, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";

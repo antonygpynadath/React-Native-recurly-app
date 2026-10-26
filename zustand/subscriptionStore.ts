@@ -1,4 +1,5 @@
 import { HOME_SUBSCRIPTIONS } from "@/constants/data";
+import { notifySubscriptionCreated } from "@/lib/notifications";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import dayjs from "dayjs";
 import { create } from "zustand";
@@ -17,7 +18,9 @@ const getNextRenewalDate = (subscription: Subscription): string => {
   const period = subscription.frequency ?? subscription.billing;
   const base = dayjs(subscription.renewalDate);
   const from = base.isValid() ? base : dayjs();
-  return period === "Monthly" ? from.add(1, "month").toISOString() : from.add(1, "year").toISOString();
+  return period === "Monthly"
+    ? from.add(1, "month").toISOString()
+    : from.add(1, "year").toISOString();
 };
 
 interface SubscriptionStore {
@@ -55,6 +58,7 @@ export const useSubscriptionStore = create<SubscriptionStore>((set, get) => ({
     const subscriptions = [subscription, ...get().subscriptions];
     set({ subscriptions });
     await persistSubscriptions(subscriptions);
+    void notifySubscriptionCreated(subscription);
   },
   updateSubscription: async (subscription) => {
     const subscriptions = get().subscriptions.map((s) =>

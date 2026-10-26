@@ -2,7 +2,7 @@ import { tabs } from "@/constants/data";
 import { ROUTES } from "@/constants/routes";
 
 import { components, getColors } from "@/constants/theme";
-import { useThemeStore } from "@/lib/themeStore";
+import { useThemeStore } from "@/zustand/themeStore";
 import { useAuth } from "@clerk/expo";
 // eslint-disable-next-line import/no-named-as-default
 import clsx from "clsx";

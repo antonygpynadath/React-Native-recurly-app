@@ -1,13 +1,8 @@
 import IconPickerModal from "@/components/IconPickerModal";
-import {
-  DEFAULT_SUBSCRIPTION_ICON,
-  formatIconLabel,
-  icons,
-  type IconKey,
-} from "@/constants/icons";
+import { DEFAULT_SUBSCRIPTION_ICON, formatIconLabel, icons, type IconKey } from "@/constants/icons";
 import { getColors } from "@/constants/theme";
-import { useThemeStore } from "@/lib/themeStore";
 import { formatSubscriptionDateTime } from "@/lib/utils";
+import { useThemeStore } from "@/zustand/themeStore";
 import DateTimePicker, { type DateTimePickerEvent } from "@react-native-community/datetimepicker";
 // eslint-disable-next-line import/no-named-as-default
 import clsx from "clsx";
@@ -291,7 +286,10 @@ const SubscriptionFormModal = ({
                     {CATEGORIES.map((cat) => (
                       <Pressable
                         key={cat}
-                        className={clsx("category-chip", category === cat && "category-chip-active")}
+                        className={clsx(
+                          "category-chip",
+                          category === cat && "category-chip-active",
+                        )}
                         onPress={() => setCategory(cat)}
                       >
                         <Text

@@ -5,10 +5,11 @@ import { SplashScreen, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { PostHogProvider } from "posthog-react-native";
 import { useEffect, useRef } from "react";
-import { posthog } from "../lib/posthog";
-import { useSubscriptionStore } from "../lib/subscriptionStore";
-import { useThemeStore } from "../lib/themeStore";
 import "../global.css";
+import { posthog } from "../lib/posthog";
+import { useNotifications } from "../lib/useNotifications";
+import { useSubscriptionStore } from "../zustand/subscriptionStore";
+import { useThemeStore } from "../zustand/themeStore";
 
 SplashScreen.preventAutoHideAsync();
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
@@ -26,6 +27,8 @@ function RootLayoutContent() {
   const hydrateTheme = useThemeStore((state) => state.hydrate);
   const subscriptionsHydrated = useSubscriptionStore((state) => state.hydrated);
   const hydrateSubscriptions = useSubscriptionStore((state) => state.hydrate);
+
+  useNotifications();
 
   const [fontsLoaded] = useFonts({
     "sans-regular": require("../assets/fonts/PlusJakartaSans-Regular.ttf"),

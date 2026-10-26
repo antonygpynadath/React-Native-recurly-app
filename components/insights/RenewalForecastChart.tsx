@@ -1,6 +1,6 @@
 import { getColors } from "@/constants/theme";
 import { formatCurrency } from "@/lib/utils";
-import { useThemeStore } from "@/lib/themeStore";
+import { useThemeStore } from "@/zustand/themeStore";
 import React, { useEffect, useMemo, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 
@@ -8,18 +8,14 @@ const CHART_HEIGHT = 140;
 
 const getPeakKey = (months: RenewalForecastMonth[]): string | undefined => {
   if (months.length === 0) return undefined;
-  return months.reduce((best, month) => (month.amount > best.amount ? month : best), months[0])
-    .key;
+  return months.reduce((best, month) => (month.amount > best.amount ? month : best), months[0]).key;
 };
 
 const RenewalForecastChart = ({ months }: RenewalForecastChartProps) => {
   const theme = useThemeStore((state) => state.theme);
   const colors = getColors(theme);
 
-  const maxAmount = useMemo(
-    () => Math.max(...months.map((month) => month.amount), 0),
-    [months],
-  );
+  const maxAmount = useMemo(() => Math.max(...months.map((month) => month.amount), 0), [months]);
 
   const [selectedKey, setSelectedKey] = useState<string | undefined>(() => getPeakKey(months));
 
@@ -50,7 +46,10 @@ const RenewalForecastChart = ({ months }: RenewalForecastChartProps) => {
           {months.map((month) => {
             const height =
               maxAmount > 0
-                ? Math.max((month.amount / maxAmount) * (CHART_HEIGHT - 8), month.amount > 0 ? 8 : 4)
+                ? Math.max(
+                    (month.amount / maxAmount) * (CHART_HEIGHT - 8),
+                    month.amount > 0 ? 8 : 4,
+                  )
                 : 4;
             const isSelected = month.key === selected?.key;
 
