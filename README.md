@@ -1,50 +1,95 @@
-# Welcome to your Expo app 👋
+# Recurly
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Recurly is an Expo mobile app for tracking subscriptions in one place. It shows each subscription’s renewal date and cost, and helps you see monthly and yearly spend across everything you pay for.
 
-## Get started
+Subscription data lives on-device (Zustand + AsyncStorage). Authentication uses [Clerk](https://clerk.com); product analytics use [PostHog](https://posthog.com).
 
-1. Install dependencies
+<video src="./assets/video/Recurly.webm" controls width="360" title="Recurly demo">
+  <a href="./assets/video/Recurly.webm">Watch the Recurly demo</a>
+</video>
+
+## Features
+
+- **Authentication (Clerk)** — Email/password sign-in and sign-up with email verification, plus a forgot-password flow. Sessions are cached with SecureStore (`@clerk/expo/token-cache`). Signed-in and signed-out users are routed by auth and tab layouts.
+- **Analytics (PostHog)** — Users are identified after Clerk login. Auth and subscription lifecycle events are tracked, with error autocapture enabled.
+- **Local notifications** — Built with `expo-notifications` (not PostHog). Requests permission, sets up an Android channel, sends a confirmation when a subscription is added, and schedules day-before renewal reminders at 09:00 local time with deep links into the subscriptions screen.
+- **Insights** — Monthly recurring spend, yearly projection, category breakdown, a 6-month renewal forecast, and top subscriptions by monthly equivalent cost.
+- **Home & subscriptions** — Upcoming renewals, pending (past due) items, search, and filters so you can manage everything from a single list.
+- **Theme** — Light and dark mode, persisted in SecureStore.
+- **Code review (CodeRabbit)** — [CodeRabbit](https://www.coderabbit.ai) reviews pull requests before they merge to `main`.
+
+## Stack
+
+| Piece | Detail |
+| --- | --- |
+| Framework | Expo SDK ~54, React Native 0.81, React 19.1 |
+| Routing | Expo Router |
+| Styling | NativeWind (Tailwind) |
+| State | Zustand |
+| Auth | Clerk (`@clerk/expo`) |
+| Analytics | PostHog (`posthog-react-native`) |
+| Notifications | `expo-notifications` |
+| Builds | EAS + `expo-dev-client` |
+| Code review | CodeRabbit (PR checks before merge to `main`) |
+
+## Requirements
+
+| Tool | Version |
+| --- | --- |
+| Node.js | **≥ 20.19.4** (Expo SDK 54 minimum) |
+| npm | Comes with Node (project uses `package-lock.json`) |
+| Expo SDK | **~54.0** |
+
+You will also need a [Clerk](https://clerk.com) publishable key and a [PostHog](https://posthog.com) project token and host. Missing PostHog env vars throw in development.
+
+For local notifications and other native modules, use a **development build** (`expo-dev-client`) or a compatible Expo Go client for SDK 54.
+
+## Setup
+
+1. **Install Node.js** ≥ 20.19.4 if you do not already have it.
+
+2. **Install dependencies**
 
    ```bash
    npm install
    ```
 
-2. Start the app
+3. **Configure environment**
+
+   Copy the example env file and fill in your keys:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+   | Variable | Description |
+   | --- | --- |
+   | `EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk publishable key |
+   | `POSTHOG_PROJECT_TOKEN` | PostHog project API key |
+   | `POSTHOG_HOST` | PostHog host (e.g. `https://us.i.posthog.com`) |
+
+4. **Start the app**
 
    ```bash
    npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+   Or use `npm start`. From the Expo CLI you can open a development build, Android emulator, iOS simulator, or Expo Go.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Scripts
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+| Command | Description |
+| --- | --- |
+| `npm start` / `npx expo start` | Start the Expo dev server |
+| `npm run android` | Start and open on Android |
+| `npm run ios` | Start and open on iOS |
+| `npm run web` | Start and open in the browser |
+| `npm run lint` | Run ESLint |
 
 ## Learn more
 
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- [Expo documentation](https://docs.expo.dev/)
+- [Expo Router](https://docs.expo.dev/router/introduction/)
+- [Clerk Expo](https://clerk.com/docs/expo/getting-started/quickstart)
+- [PostHog React Native](https://posthog.com/docs/libraries/react-native)
+- [CodeRabbit](https://www.coderabbit.ai)
