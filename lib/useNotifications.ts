@@ -1,10 +1,10 @@
-import { useSubscriptionStore } from "@/lib/subscriptionStore";
 import {
   addNotificationListeners,
   getNotificationDeepLink,
   registerForPushNotificationsAsync,
   syncRenewalReminders,
 } from "@/lib/notifications";
+import { useSubscriptionStore } from "@/lib/subscriptionStore";
 import * as Linking from "expo-linking";
 import { useRouter } from "expo-router";
 import { useEffect } from "react";
@@ -23,7 +23,7 @@ export function useNotifications() {
     //register for push notifications
     registerForPushNotificationsAsync().then((token) => {
       if (!cancelled && token) {
-        console.log("Expo push token:", token);
+        console.log("-----------------------EXPO PUSH TOKEN-----------------------:", token);
       }
     });
 
